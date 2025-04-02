@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Cancel a Ride</h2>
+    <form method="POST">
+        <label>Ride ID: <input type="text" name="ride_id"></label><br>
+        <button type="submit">Cancel</button>
+    </form>
+    {% if message %}<p>{{ message }}</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm" data-aos="fade-up">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Thêm thẻ tín dụng/ghi nợ mới
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="tab-buttons mb-4">
+                        <div class="btn-group w-100">
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='credit') }}" 
+                               class="btn btn-lg btn-primary">
+                                <i class="fas fa-credit-card me-2"></i>Thẻ tín dụng/ghi nợ
+                            </a>
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='bank') }}" 
+                               class="btn btn-lg btn-outline-primary">
+                                <i class="fas fa-university me-2"></i>Tài khoản ngân hàng
+                            </a>
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='ewallet') }}" 
+                               class="btn btn-lg btn-outline-primary">
+                                <i class="fas fa-wallet me-2"></i>Ví điện tử
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Form thêm thẻ tín dụng -->
+                    <form action="{{ url_for('payment.add_credit_card') }}{% if request.args.get('from_booking') %}?from_booking=1{% endif %}" method="post" id="creditCardForm">
+                        <div class="mb-4">
+                            <div class="credit-card-container">
+                                <div class="credit-card">
+                                    <div class="credit-card-front">
+                                        <div class="card-type">
+                                            <img src="{{ url_for('static', filename='image/logo/visa.png') }}" alt="Card Type" id="cardTypeImage" class="card-logo">
+                                        </div>
+                                        <div class="card-number" id="cardNumberDisplay">•••• •••• •••• ••••</div>
+                                        <div class="card-info">
+                                            <div class="card-holder">
+                                                <label>CHỦ THẺ</label>
+                                                <div id="cardHolderDisplay">NGUYEN VAN A</div>
+                                            </div>
+                                            <div class="card-expiry">
+                                                <label>HẾT HẠN</label>
+                                                <div><span id="expiryMonthDisplay">MM</span>/<span id="expiryYearDisplay">YY</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="credit-card-back">
+                                        <div class="card-stripe"></div>
+                                        <div class="card-cvv">
+                                            <label>CVV</label>
+                                            <div class="cvv-box" id="cvvDisplay">•••</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Loại thẻ <span class="text-danger">*</span></label>
+                                <select class="form-select" name="card_type" id="cardType" required>
+                                    <option value="">-- Chọn loại thẻ --</option>
+                                    <option value="Visa">Visa</option>
+                                    <option value="MasterCard">MasterCard</option>
+                                    <option value="JCB">JCB</option>
+                                    <option value="American Express">American Express</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Số thẻ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="card_number" id="cardNumber" 
+                                       placeholder="1234 5678 9012 3456" maxlength="16" required>
+                                <div class="form-text">Nhập đúng số thẻ không có khoảng trắng</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tên chủ thẻ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="card_holder" id="cardHolder" 
+                                       placeholder="Như trên thẻ" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Tháng hết hạn <span class="text-danger">*</span></label>
+                                <select class="form-select" name="expiry_month" id="expiryMonth" required>
+                                    <option value="">MM</option>
+                                    {% for i in range(1, 13) %}
+                                    <option value="{{ '%02d'|format(i) }}">{{ '%02d'|format(i) }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Năm hết hạn <span class="text-danger">*</span></label>
+                                <select class="form-select" name="expiry_year" id="expiryYear" required>
+                                    <option value="">YY</option>
+                                    {% set current_year = now.year %}
+                                    {% for i in range(current_year|int % 100, (current_year|int % 100) + 10) %}
+                                    <option value="{{ '%02d'|format(i) }}">{{ '%02d'|format(i) }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mã bảo mật (CVV) <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="cvv" id="cvv" 
+                                       placeholder="123" maxlength="4" required>
+                                <div class="form-text">3 hoặc 4 số ở mặt sau thẻ</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="saveCard" name="save_card" checked>
+                            <label class="form-check-label" for="saveCard">Lưu thông tin thẻ này cho lần sau</label>
+                        </div>
+
+                        <div class="security-notice mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-shield-alt fs-3 me-3 text-primary"></i>
+                                <div>
+                                    <p class="mb-0">Thông tin thẻ của bạn được bảo mật 100% theo tiêu chuẩn PCI DSS</p>
+                                    <small class="text-muted">Chúng tôi không lưu trữ CVV sau khi xác thực</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Thêm thẻ mới
+                            </button>
+                            {% if request.args.get('from_booking') %}
+                            <a href="{{ url_for('book_ride.book_ride') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại đặt xe
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('users.profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại hồ sơ
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.credit-card-container {
+    perspective: 1000px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.credit-card {
+    width: 100%;
+    height: 220px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.credit-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.credit-card-front,
+.credit-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background: linear-gradient(135deg, #4286f4, #373B44);
+    color: white;
+}
+
+.credit-card-back {
+    transform: rotateY(180deg);
+}
+
+.card-logo {
+    max-height: 40px;
+    max-width: 60px;
+}
+
+.card-type {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.card-number {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    font-family: 'Courier New', monospace;
+}
+
+.card-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.card-holder, .card-expiry {
+    text-transform: uppercase;
+}
+
+.card-holder label, .card-expiry label {
+    display: block;
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+    opacity: 0.8;
+}
+
+.card-stripe {
+    height: 40px;
+    background-color: #444;
+    margin: 20px 0 30px 0;
+}
+
+.card-cvv {
+    background-color: white;
+    color: #333;
+    width: 60%;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    float: right;
+}
+
+.card-cvv label {
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.cvv-box {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    text-align: center;
+}
+</style>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Flip the card when focusing on CVV field
+        const cvvInput = document.getElementById('cvv');
+        const creditCard = document.querySelector('.credit-card');
+        
+        cvvInput.addEventListener('focus', function() {
+            creditCard.classList.add('flipped');
+        });
+        
+        cvvInput.addEventListener('blur', function() {
+            creditCard.classList.remove('flipped');
+        });
+        
+        // Update card number display with formatting
+        const cardNumberInput = document.getElementById('cardNumber');
+        const cardNumberDisplay = document.getElementById('cardNumberDisplay');
+        
+        cardNumberInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            let formattedValue = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            // Update visual display
+            if (value.length > 0) {
+                cardNumberDisplay.textContent = formattedValue;
+            } else {
+                cardNumberDisplay.textContent = '•••• •••• •••• ••••';
+            }
+            
+            // Update input value (without spaces for submission)
+            this.value = value;
+        });
+        
+        // Update card holder display
+        const cardHolderInput = document.getElementById('cardHolder');
+        const cardHolderDisplay = document.getElementById('cardHolderDisplay');
+        
+        cardHolderInput.addEventListener('input', function() {
+            if (this.value.trim().length > 0) {
+                cardHolderDisplay.textContent = this.value.toUpperCase();
+            } else {
+                cardHolderDisplay.textContent = 'NGUYEN VAN A';
+            }
+        });
+        
+        // Update expiry month display
+        const expiryMonthInput = document.getElementById('expiryMonth');
+        const expiryMonthDisplay = document.getElementById('expiryMonthDisplay');
+        
+        expiryMonthInput.addEventListener('change', function() {
+            if (this.value) {
+                expiryMonthDisplay.textContent = this.value;
+            } else {
+                expiryMonthDisplay.textContent = 'MM';
+            }
+        });
+        
+        // Update expiry year display
+        const expiryYearInput = document.getElementById('expiryYear');
+        const expiryYearDisplay = document.getElementById('expiryYearDisplay');
+        
+        expiryYearInput.addEventListener('change', function() {
+            if (this.value) {
+                expiryYearDisplay.textContent = this.value;
+            } else {
+                expiryYearDisplay.textContent = 'YY';
+            }
+        });
+        
+        // Update CVV display
+        const cvvDisplay = document.getElementById('cvvDisplay');
+        
+        cvvInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            this.value = value;
+            
+            if (value.length > 0) {
+                let cvvMask = '';
+                for (let i = 0; i < value.length; i++) {
+                    cvvMask += '•';
+                }
+                cvvDisplay.textContent = cvvMask;
+            } else {
+                cvvDisplay.textContent = '•••';
+            }
+        });
+        
+        // Update card type image
+        const cardTypeInput = document.getElementById('cardType');
+        const cardTypeImage = document.getElementById('cardTypeImage');
+        
+        cardTypeInput.addEventListener('change', function() {
+            const cardType = this.value;
+            if (cardType === 'Visa') {
+                cardTypeImage.src = "{{ url_for('static', filename='image/visa.png') }}";
+            } else if (cardType === 'MasterCard') {
+                cardTypeImage.src = "{{ url_for('static', filename='image/mastercard.png') }}";
+            } else if (cardType === 'JCB') {
+                cardTypeImage.src = "{{ url_for('static', filename='image/jcb.png') }}";
+            } else if (cardType === 'American Express') {
+                cardTypeImage.src = "{{ url_for('static', filename='image/amex.png') }}";
+            } else {
+                cardTypeImage.src = "{{ url_for('static', filename='image/credit-card.png') }}";
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

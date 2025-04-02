@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        {% if payment_type == 'bank' %}
+                        <i class="fas fa-university me-2"></i>Thêm tài khoản ngân hàng
+                        {% else %}
+                        <i class="fas fa-wallet me-2"></i>Liên kết ví điện tử
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if payment_type == 'bank' %}
+                    <!-- Bank Account Form -->
+                    <div id="bank-account-form">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn ngân hàng</label>
+                            <select class="form-select" id="bank-name">
+                                <option value="">Chọn ngân hàng</option>
+                                <option value="Vietcombank">Vietcombank</option>
+                                <option value="BIDV">BIDV</option>
+                                <option value="Techcombank">Techcombank</option>
+                                <option value="VPBank">VPBank</option>
+                                <option value="MBBank">MBBank</option>
+                                <option value="ACB">ACB</option>
+                                <option value="Sacombank">Sacombank</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số tài khoản</label>
+                            <input type="text" class="form-control" id="account-number" placeholder="Nhập số tài khoản ngân hàng">
+                            <div class="form-text">Vui lòng nhập số tài khoản từ 9-20 chữ số</div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-primary" id="add-bank-btn">
+                                <i class="fas fa-plus me-2"></i>Thêm tài khoản ngân hàng
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Display existing bank accounts -->
+                    {% if user.bank_accounts %}
+                    <div class="mt-4">
+                        <h6>Tài khoản đã liên kết</h6>
+                        <div class="list-group">
+                            {% for account in user.bank_accounts %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ account.bank_name }}</h6>
+                                        <small class="text-muted">**** **** **** {{ account.last_4_digits }}</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger delete-bank-btn" data-account-id="{{ account.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <!-- Digital Wallet Form -->
+                    <div id="digital-wallet-form">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn ví điện tử</label>
+                            <select class="form-select" id="wallet-provider">
+                                <option value="">Chọn ví điện tử</option>
+                                <option value="momo">Momo</option>
+                                <option value="zalopay">ZaloPay</option>
+                                <option value="vnpay">VNPay</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID ví điện tử</label>
+                            <input type="text" class="form-control" id="wallet-id" placeholder="Nhập ID ví điện tử">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-primary" id="link-wallet-btn">
+                                <i class="fas fa-link me-2"></i>Liên kết ví điện tử
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Display existing wallets -->
+                    {% if user.digital_wallets %}
+                    <div class="mt-4">
+                        <h6>Ví đã liên kết</h6>
+                        <div class="list-group">
+                            {% for wallet in user.digital_wallets %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ wallet.provider|title }}</h6>
+                                        <small class="text-muted">ID: {{ wallet.wallet_id }}</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger delete-wallet-btn" data-wallet-id="{{ wallet.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('book_ride.book_ride') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại đặt xe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add bank account functionality
+document.getElementById('add-bank-btn').addEventListener('click', function() {
+    const bankName = document.getElementById('bank-name').value;
+    const accountNumber = document.getElementById('account-number').value;
+    
+    if (!bankName) {
+        alert('Vui lòng chọn ngân hàng');
+        return;
+    }
+    
+    if (!accountNumber) {
+        alert('Vui lòng nhập số tài khoản');
+        return;
+    }
+    
+    // Kiểm tra định dạng số tài khoản
+    if (!/^\d{9,20}$/.test(accountNumber)) {
+        alert('Số tài khoản không hợp lệ. Vui lòng nhập từ 9-20 chữ số.');
+        return;
+    }
+    
+    // Gửi request thêm tài khoản
+    fetch('{{ url_for("payment.add_bank_account") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            bank_name: bankName,
+            account_number: accountNumber
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Thêm tài khoản ngân hàng thành công!');
+            location.reload();
+        } else {
+            alert(data.message || 'Có lỗi xảy ra khi thêm tài khoản ngân hàng.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi thêm tài khoản ngân hàng.');
+    });
+});
+
+// Link wallet functionality
+document.getElementById('link-wallet-btn')?.addEventListener('click', function() {
+    const walletProvider = document.getElementById('wallet-provider').value;
+    const walletId = document.getElementById('wallet-id').value;
+    
+    if (!walletProvider) {
+        alert('Vui lòng chọn ví điện tử');
+        return;
+    }
+    
+    if (!walletId) {
+        alert('Vui lòng nhập ID ví điện tử');
+        return;
+    }
+    
+    // Gửi request liên kết ví
+    fetch('{{ url_for("payment.link_wallet") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            wallet_provider: walletProvider,
+            wallet_id: walletId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Liên kết ví điện tử thành công!');
+            location.reload();
+        } else {
+            alert(data.message || 'Có lỗi xảy ra khi liên kết ví điện tử.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi liên kết ví điện tử.');
+    });
+});
+
+// Delete bank account functionality
+document.querySelectorAll('.delete-bank-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const accountId = this.getAttribute('data-account-id');
+        
+        if (confirm('Bạn có chắc chắn muốn xóa tài khoản ngân hàng này không?')) {
+            fetch(`{{ url_for('payment.delete_bank_account', account_id=0) }}`.replace('0', accountId), {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Xóa tài khoản ngân hàng thành công!');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra khi xóa tài khoản ngân hàng.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa tài khoản ngân hàng.');
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

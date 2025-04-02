@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm" data-aos="fade-up">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Lịch sử giao dịch</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="dropdown me-2">
+                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-filter me-1"></i>Bộ lọc
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+                                    <li><a class="dropdown-item filter-item active" href="#" data-filter="all">Tất cả</a></li>
+                                    <li><a class="dropdown-item filter-item" href="#" data-filter="deposit">Nạp tiền</a></li>
+                                    <li><a class="dropdown-item filter-item" href="#" data-filter="withdrawal">Rút tiền</a></li>
+                                    <li><a class="dropdown-item filter-item" href="#" data-filter="payment">Thanh toán</a></li>
+                                    <li><a class="dropdown-item filter-item" href="#" data-filter="refund">Hoàn tiền</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-check-circle me-1"></i>Trạng thái
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                                    <li><a class="dropdown-item status-item active" href="#" data-status="all">Tất cả</a></li>
+                                    <li><a class="dropdown-item status-item" href="#" data-status="completed">Hoàn thành</a></li>
+                                    <li><a class="dropdown-item status-item" href="#" data-status="pending">Đang xử lý</a></li>
+                                    <li><a class="dropdown-item status-item" href="#" data-status="failed">Thất bại</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    {% if transactions %}
+                    <div class="transaction-timeline">
+                        {% set current_date = None %}
+                        {% for transaction in transactions %}
+                            {% set transaction_date = transaction.created_at.strftime('%Y-%m-%d') %}
+                            
+                            {% if transaction_date != current_date %}
+                                {% if current_date is not none %}</div>{% endif %}
+                                <div class="timeline-date">
+                                    <div class="date-label">{{ transaction.created_at.strftime('%d/%m/%Y') }}</div>
+                                </div>
+                                <div class="timeline-items">
+                                {% set current_date = transaction_date %}
+                            {% endif %}
+                            
+                            <div class="timeline-item transaction-item {{ transaction.type }} {{ transaction.status }}" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+                                <div class="timeline-dot 
+                                    {% if transaction.type == 'deposit' %}bg-success{% 
+                                    elif transaction.type == 'withdrawal' %}bg-warning{% 
+                                    elif transaction.type == 'payment' %}bg-danger{% 
+                                    elif transaction.type == 'refund' %}bg-info{% 
+                                    else %}bg-secondary{% endif %}">
+                                    {% if transaction.type == 'deposit' %}<i class="fas fa-arrow-down"></i>{% 
+                                    elif transaction.type == 'withdrawal' %}<i class="fas fa-arrow-up"></i>{% 
+                                    elif transaction.type == 'payment' %}<i class="fas fa-shopping-cart"></i>{% 
+                                    elif transaction.type == 'refund' %}<i class="fas fa-undo"></i>{% 
+                                    else %}<i class="fas fa-exchange-alt"></i>{% endif %}
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="transaction-title">
+                                                {% if transaction.type == 'deposit' %}Nạp tiền{% 
+                                                elif transaction.type == 'withdrawal' %}Rút tiền{% 
+                                                elif transaction.type == 'payment' %}Thanh toán chuyến đi #{{ transaction.payment.ride_passenger.ride_id }}{% 
+                                                elif transaction.type == 'refund' %}Hoàn tiền{% 
+                                                else %}Giao dịch{% endif %}
+                                            </h6>
+                                            <p class="transaction-time text-muted">{{ transaction.created_at.strftime('%H:%M') }}</p>
+                                        </div>
+                                        <div class="transaction-amount {% if transaction.type == 'deposit' or transaction.type == 'refund' %}text-success{% else %}text-danger{% endif %}">
+                                            {% if transaction.type == 'deposit' or transaction.type == 'refund' %}+{% else %}-{% endif %}{{ "{:,.0f}".format(transaction.amount) }}đ
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="transaction-details mt-2">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="detail-label">Trạng thái:</div>
+                                            <div class="detail-value">
+                                                <span class="status-badge 
+                                                    {% if transaction.status == 'completed' %}bg-success{% 
+                                                    elif transaction.status == 'pending' %}bg-warning{% 
+                                                    elif transaction.status == 'failed' %}bg-danger{% 
+                                                    else %}bg-secondary{% endif %}">
+                                                    {% if transaction.status == 'completed' %}Hoàn thành{% 
+                                                    elif transaction.status == 'pending' %}Đang xử lý{% 
+                                                    elif transaction.status == 'failed' %}Thất bại{% 
+                                                    else %}Hủy{% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <div class="detail-label">Phương thức:</div>
+                                            <div class="detail-value">
+                                                {% if transaction.payment_method == 'credit_card' %}Thẻ tín dụng{% 
+                                                elif transaction.payment_method == 'bank_transfer' %}Chuyển khoản{% 
+                                                elif transaction.payment_method == 'wallet' %}Ví ShareGeb{% 
+                                                elif transaction.payment_method == 'momo' %}Ví MoMo{% 
+                                                else %}{{ transaction.payment_method }}{% endif %}
+                                            </div>
+                                        </div>
+                                        {% if transaction.description %}
+                                        <div class="d-flex justify-content-between">
+                                            <div class="detail-label">Mô tả:</div>
+                                            <div class="detail-value">{{ transaction.description }}</div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="d-flex justify-content-between">
+                                            <div class="detail-label">Mã giao dịch:</div>
+                                            <div class="detail-value transaction-id">{{ transaction.id }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if loop.last %}</div>{% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <img src="{{ url_for('static', filename='image/no-transactions.png') }}" alt="Không có giao dịch" class="img-fluid mb-3" style="max-height: 150px;">
+                        <p class="text-muted">Bạn chưa có giao dịch nào</p>
+                        <a href="{{ url_for('payment.wallet') }}" class="btn btn-primary mt-2">
+                            <i class="fas fa-wallet me-2"></i>Quay lại Ví
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.transaction-timeline {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.timeline-date {
+    display: flex;
+    justify-content: flex-start;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.date-label {
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.timeline-items {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 2rem;
+}
+
+.timeline-items:before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: rgba(0,0,0,0.1);
+}
+
+.timeline-item {
+    position: relative;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -30px;
+    top: 1.5rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    z-index: 2;
+}
+
+.transaction-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.transaction-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.transaction-time {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.transaction-details {
+    background: rgba(0,0,0,0.02);
+    border-radius: 5px;
+    padding: 0.8rem;
+    font-size: 0.85rem;
+}
+
+.detail-label {
+    color: #777;
+    font-weight: 500;
+}
+
+.detail-value {
+    text-align: right;
+    font-weight: 500;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.transaction-id {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.filter-item.active, .status-item.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý lọc theo loại giao dịch
+    document.querySelectorAll('.filter-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all filter items
+            document.querySelectorAll('.filter-item').forEach(i => {
+                i.classList.remove('active');
+            });
+            
+            // Add active class to current item
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            filterTransactions();
+        });
+    });
+    
+    // Xử lý lọc theo trạng thái
+    document.querySelectorAll('.status-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all status items
+            document.querySelectorAll('.status-item').forEach(i => {
+                i.classList.remove('active');
+            });
+            
+            // Add active class to current item
+            this.classList.add('active');
+            
+            const status = this.getAttribute('data-status');
+            filterTransactions();
+        });
+    });
+    
+    function filterTransactions() {
+        const filterType = document.querySelector('.filter-item.active').getAttribute('data-filter');
+        const filterStatus = document.querySelector('.status-item.active').getAttribute('data-status');
+        
+        document.querySelectorAll('.transaction-item').forEach(item => {
+            const typeMatch = filterType === 'all' || item.classList.contains(filterType);
+            const statusMatch = filterStatus === 'all' || item.classList.contains(filterStatus);
+            
+            if (typeMatch && statusMatch) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        // Check if date sections are empty and hide them
+        document.querySelectorAll('.timeline-items').forEach(section => {
+            const visibleItems = section.querySelectorAll('.transaction-item[style="display: block"]').length;
+            const dateLabel = section.previousElementSibling;
+            
+            if (visibleItems === 0) {
+                section.style.display = 'none';
+                if (dateLabel && dateLabel.classList.contains('timeline-date')) {
+                    dateLabel.style.display = 'none';
+                }
+            } else {
+                section.style.display = 'block';
+                if (dateLabel && dateLabel.classList.contains('timeline-date')) {
+                    dateLabel.style.display = 'flex';
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" data-aos="fade-up">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header text-white text-center" style="background-color: var(--primary-color);">
+                    <h4><i class="fas fa-tags me-2"></i>Mã giảm giá</h4>
+                </div>
+                <div class="card-body">
+                    {% if message %}
+                    <div class="alert {% if success %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                        <i class="fas {% if success %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ url_for('discount.apply_discount') }}" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="code" class="form-control" placeholder="Nhập mã giảm giá" required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Áp dụng
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Danh sách mã giảm giá đang có -->
+                    <h5 class="mb-3">Mã giảm giá hiện có</h5>
+                    
+                    {% if available_discounts %}
+                    <div class="row">
+                        {% for discount in available_discounts %}
+                        <div class="col-md-6 mb-3" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                            <div class="voucher-card">
+                                <div class="voucher-content">
+                                    <div class="voucher-amount">{{ discount.discount_percentage }}%</div>
+                                    <div class="voucher-info">
+                                        <h6>{{ discount.code }}</h6>
+                                        <p class="mb-1">Giảm tối đa {{ "{:,.0f}".format(discount.max_discount_amount) }}đ</p>
+                                        <small class="text-muted">Hết hạn: {{ discount.valid_to.strftime('%d/%m/%Y') }}</small>
+                                    </div>
+                                </div>
+                                <div class="voucher-action">
+                                    <button class="btn btn-sm btn-primary copy-code" data-code="{{ discount.code }}">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4" data-aos="fade-up">
+                        <img src="{{ url_for('static', filename='image/no-voucher.png') }}" alt="Không có mã giảm giá" class="img-fluid mb-3" style="max-height: 150px;">
+                        <p class="text-muted">Bạn chưa có mã giảm giá nào</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Các mã giảm giá đã sử dụng -->
+                    <h5 class="mt-4 mb-3">Mã đã sử dụng</h5>
+                    {% if used_discounts %}
+                    <div class="list-group">
+                        {% for usage in used_discounts %}
+                        <div class="list-group-item list-group-item-action disabled">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ usage.discount.code }}</h6>
+                                <small>{{ usage.used_at.strftime('%d/%m/%Y') }}</small>
+                            </div>
+                            <p class="mb-1">Giảm {{ usage.discount.discount_percentage }}%</p>
+                            <small>Áp dụng cho chuyến đi #{{ usage.ride_passenger.ride_id }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">Bạn chưa sử dụng mã giảm giá nào</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.voucher-card {
+    display: flex;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px dashed var(--primary-color);
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.voucher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.voucher-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 75%;
+    width: 20px;
+    height: 20px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.voucher-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 75%;
+    width: 20px;
+    height: 20px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    transform: translate(-50%, 50%);
+    box-shadow: inset 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.voucher-content {
+    display: flex;
+    padding: 15px;
+    flex: 1;
+    background: linear-gradient(135deg, rgba(253,86,2,0.1) 0%, rgba(242,160,61,0.05) 100%);
+}
+
+.voucher-amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.voucher-info {
+    flex: 1;
+}
+
+.voucher-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+    background-color: rgba(253,86,2,0.1);
+    border-left: 1px dashed var(--primary-color);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.copy-code:hover {
+    animation: pulse 1s infinite;
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy voucher code to clipboard
+    document.querySelectorAll('.copy-code').forEach(button => {
+        button.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            navigator.clipboard.writeText(code).then(() => {
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                this.classList.remove('btn-primary');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-primary');
+                }, 2000);
+                
+                // Hiển thị thông báo
+                const toast = document.createElement('div');
+                toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3';
+                toast.style.zIndex = "1050";
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'assertive');
+                toast.setAttribute('aria-atomic', 'true');
+                toast.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Đã sao chép mã: ${code}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

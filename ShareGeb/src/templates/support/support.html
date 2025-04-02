@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="display-4 fw-bold mb-4" data-aos="fade-up">Trung tâm hỗ trợ ShareGeb</h1>
+            <p class="lead" data-aos="fade-up" data-aos-delay="100">
+                Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7. Dưới đây là các cách để liên hệ với chúng tôi.
+            </p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4" data-aos="fade-up">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                        <i class="fas fa-headset text-primary fa-3x"></i>
+                    </div>
+                    <h4 class="mb-3">Hỗ trợ trực tuyến</h4>
+                    <p class="card-text text-muted">
+                        Trò chuyện trực tiếp với đội ngũ hỗ trợ của chúng tôi để được giải đáp nhanh chóng.
+                    </p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#chatModal">
+                        <i class="fas fa-comments me-2"></i>Trò chuyện ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 d-inline-flex mb-3">
+                        <i class="fas fa-phone-alt text-success fa-3x"></i>
+                    </div>
+                    <h4 class="mb-3">Hotline</h4>
+                    <p class="card-text text-muted">
+                        Gọi cho chúng tôi để được hỗ trợ trực tiếp từ đội ngũ chăm sóc khách hàng.
+                    </p>
+                    <a href="tel:+842412345678" class="btn btn-success mt-3">
+                        <i class="fas fa-phone-alt me-2"></i>024 1234 5678
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex mb-3">
+                        <i class="fas fa-envelope text-info fa-3x"></i>
+                    </div>
+                    <h4 class="mb-3">Email</h4>
+                    <p class="card-text text-muted">
+                        Gửi email để được hỗ trợ chi tiết về các vấn đề phức tạp hơn.
+                    </p>
+                    <a href="mailto:support@sharegeb.vn" class="btn btn-info text-white mt-3">
+                        <i class="fas fa-envelope me-2"></i>support@sharegeb.vn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-10 mx-auto">
+            <div class="card border-0 shadow-sm" data-aos="fade-up">
+                <div class="card-body p-5">
+                    <h2 class="mb-4 text-center">Câu hỏi thường gặp</h2>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Làm thế nào để đặt xe trên ShareGeb?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Để đặt xe trên ShareGeb, bạn cần:</p>
+                                    <ol>
+                                        <li>Đăng nhập vào tài khoản của bạn</li>
+                                        <li>Chọn "Đặt xe" từ menu chính</li>
+                                        <li>Nhập địa điểm đón và điểm đến</li>
+                                        <li>Chọn loại xe và phương thức thanh toán</li>
+                                        <li>Xác nhận đặt xe</li>
+                                    </ol>
+                                    <p>Sau khi hoàn thành các bước trên, hệ thống sẽ tìm tài xế phù hợp và thông báo cho bạn.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button     " type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Làm thế nào để hủy chuyến đi đã đặt?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Để hủy chuyến đi đã đặt, bạn có thể:</p>
+                                    <ol>
+                                        <li>Mở ứng dụng ShareGeb</li>
+                                        <li>Vào phần "Chuyến đi hiện tại"</li>
+                                        <li>Chọn "Hủy chuyến"</li>
+                                        <li>Chọn lý do hủy và xác nhận</li>
+                                    </ol>
+                                    <p>Lưu ý: Việc hủy chuyến có thể phát sinh phí tùy thuộc vào thời điểm hủy so với thời gian đặt xe.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Làm sao để báo cáo vấn đề về chuyến đi?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Nếu bạn gặp vấn đề với chuyến đi, bạn có thể báo cáo bằng cách:</p>
+                                    <ol>
+                                        <li>Vào phần "Chuyến đi gần đây" trong tài khoản của bạn</li>
+                                        <li>Chọn chuyến đi có vấn đề</li>
+                                        <li>Chọn "Báo cáo vấn đề"</li>
+                                        <li>Mô tả chi tiết vấn đề và gửi báo cáo</li>
+                                    </ol>
+                                    <p>Đội ngũ hỗ trợ của chúng tôi sẽ xem xét báo cáo và liên hệ với bạn trong vòng 24 giờ.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    Các phương thức thanh toán được chấp nhận?
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>ShareGeb chấp nhận nhiều phương thức thanh toán khác nhau, bao gồm:</p>
+                                    <ul>
+                                        <li>Tiền mặt</li>
+                                        <li>Thẻ tín dụng/ghi nợ (Visa, Mastercard, JCB)</li>
+                                        <li>Ví điện tử (Momo, ZaloPay, VNPay, Shopee Pay, GrabPay)</li>
+                                        <li>Chuyển khoản ngân hàng</li>
+                                    </ul>
+                                    <p>Bạn có thể thêm hoặc quản lý các phương thức thanh toán trong phần "Chỉnh sửa thông tin" của tài khoản.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item border-0 mb-3 shadow-sm">
+                            <h2 class="accordion-header" id="headingFive">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    Làm thế nào để trở thành tài xế cho ShareGeb?
+                                </button>
+                            </h2>
+                            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>Để trở thành tài xế đối tác với ShareGeb, bạn cần:</p>
+                                    <ol>
+                                        <li>Truy cập trang "Trở thành đối tác" trên website của chúng tôi</li>
+                                        <li>Đăng ký thông tin cá nhân và phương tiện</li>
+                                        <li>Cung cấp giấy tờ cần thiết (CMND/CCCD, bằng lái xe, đăng ký xe, ...)</li>
+                                        <li>Tham gia buổi đào tạo ngắn</li>
+                                        <li>Hoàn tất các thủ tục pháp lý</li>
+                                    </ol>
+                                    <p>Sau khi hoàn thành và được xác minh, bạn sẽ trở thành tài xế đối tác chính thức của ShareGeb.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5" data-aos="fade-up">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h3 class="mb-4">Gửi yêu cầu hỗ trợ</h3>
+                    <form id="supportForm">
+                        <div class="mb-3">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" placeholder="Nhập họ và tên" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" placeholder="Nhập email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Chủ đề</label>
+                            <select class="form-select" required>
+                                <option value="">Chọn chủ đề</option>
+                                <option value="booking">Vấn đề đặt xe</option>
+                                <option value="payment">Vấn đề thanh toán</option>
+                                <option value="account">Tài khoản</option>
+                                <option value="driver">Vấn đề với tài xế</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả vấn đề</label>
+                            <textarea class="form-control" rows="5" placeholder="Mô tả chi tiết vấn đề của bạn" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Đính kèm file (nếu có)</label>
+                            <input type="file" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary px-4">Gửi yêu cầu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h3 class="mb-4">Thông tin liên hệ</h3>
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Địa chỉ</h5>
+                            <p class="text-muted">Tầng 15, Tòa nhà Capital Place, 29 Liễu Giai, Phường Ngọc Khánh, Quận Ba Đình, Hà Nội</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="fas fa-phone-alt fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Điện thoại</h5>
+                            <p class="text-muted">Hotline: (024) 1234 5678<br>Hỗ trợ kỹ thuật: (024) 8765 4321</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="fas fa-envelope fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Email</h5>
+                            <p class="text-muted">Hỗ trợ chung: support@sharegeb.vn<br>Góp ý dịch vụ: feedback@sharegeb.vn</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="fas fa-clock fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5>Giờ làm việc</h5>
+                            <p class="text-muted">Thứ Hai - Thứ Sáu: 8:00 - 18:00<br>Thứ Bảy: 8:00 - 12:00<br>Hỗ trợ khẩn cấp: 24/7</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="chatModalLabel">
+                    <i class="fas fa-comments me-2"></i>Hỗ trợ trực tuyến
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="chat-container" id="chatContainer">
+                    <div class="chat-message assistant">
+                        <div class="chat-bubble">
+                            <p>Xin chào! Tôi là trợ lý ảo của ShareGeb. Tôi có thể giúp gì cho bạn?</p>
+                        </div>
+                        <small class="text-muted">Trợ lý ShareGeb, 09:30</small>
+                    </div>
+                    <!-- Chat messages will appear here -->
+                </div>
+                <div class="chat-input mt-3">
+                    <form id="chatForm" class="d-flex">
+                        <input type="text" id="chatMessage" class="form-control me-2" placeholder="Nhập tin nhắn..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--primary-color);
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(0,0,0,.125);
+    }
+    
+    .chat-container {
+        height: 300px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-message {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-message.user {
+        align-items: flex-end;
+    }
+    
+    .chat-message.assistant {
+        align-items: flex-start;
+    }
+    
+    .chat-bubble {
+        max-width: 80%;
+        padding: 10px 15px;
+        border-radius: 15px;
+    }
+    
+    .chat-message.user .chat-bubble {
+        background-color: var(--primary-color);
+        color: white;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .chat-message.assistant .chat-bubble {
+        background-color: #f0f2f5;
+        border-bottom-left-radius: 5px;
+    }
+    
+    .chat-bubble p {
+        margin-bottom: 0;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chatForm');
+    const chatMessage = document.getElementById('chatMessage');
+    const chatContainer = document.getElementById('chatContainer');
+    
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = chatMessage.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        addMessage('user', message);
+        chatMessage.value = '';
+        
+        // Simulate assistant response
+        setTimeout(() => {
+            addMessage('assistant', 'Cảm ơn bạn đã liên hệ. Hiện tại hệ thống chatbot đang được phát triển. Chúng tôi sẽ liên hệ với bạn qua email hoặc số điện thoại.');
+        }, 1000);
+    });
+    
+    function addMessage(sender, text) {
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2, '0') + ':' + 
+                    now.getMinutes().toString().padStart(2, '0');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${sender}`;
+        
+        messageDiv.innerHTML = `
+            <div class="chat-bubble">
+                <p>${text}</p>
+            </div>
+            <small class="text-muted">${sender === 'user' ? 'Bạn' : 'Trợ lý ShareGeb'}, ${time}</small>
+        `;
+        
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    
+    // Handle support form submission
+    const supportForm = document.getElementById('supportForm');
+    if (supportForm) {
+        supportForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Cảm ơn bạn! Yêu cầu hỗ trợ của bạn đã được gửi. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.');
+            supportForm.reset();
+        });
+    }
+});
+</script>
+{% endblock %} 

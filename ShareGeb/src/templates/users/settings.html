@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
+                        <i class="fas fa-cog me-2"></i>Cài đặt chung
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab" aria-controls="payment" aria-selected="false">
+                        <i class="fas fa-credit-card me-2"></i>Phương thức thanh toán
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <!-- Tab Cài đặt chung -->
+                <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-cog me-2"></i>Cài đặt chung
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <!-- Thông báo -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Thông báo</h6>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="emailNotif" checked>
+                                        <label class="form-check-label" for="emailNotif">Email thông báo</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="smsNotif" checked>
+                                        <label class="form-check-label" for="smsNotif">SMS thông báo</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="pushNotif" checked>
+                                        <label class="form-check-label" for="pushNotif">Push thông báo</label>
+                                    </div>
+                                </div>
+
+                                <!-- Bảo mật -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Bảo mật</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">Mật khẩu hiện tại</label>
+                                        <input type="password" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Mật khẩu mới</label>
+                                        <input type="password" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Xác nhận mật khẩu mới</label>
+                                        <input type="password" class="form-control">
+                                    </div>
+                                </div>
+
+                                <!-- Ngôn ngữ -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Ngôn ngữ</h6>
+                                    <select class="form-select">
+                                        <option value="vi">Tiếng Việt</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
+
+                                <!-- Chế độ tối -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Giao diện</h6>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="darkMode">
+                                        <label class="form-check-label" for="darkMode">Chế độ tối</label>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Phương thức thanh toán -->
+                <div class="tab-pane fade" id="payment" role="tabpanel" aria-labelledby="payment-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-credit-card me-2"></i>Phương thức thanh toán
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Tài khoản ngân hàng -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Tài khoản ngân hàng</h6>
+                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#bankAccountModal">
+                                        <i class="fas fa-plus me-1"></i> Thêm tài khoản
+                                    </button>
+                                </div>
+                                
+                                <div id="bankAccounts" class="list-group">
+                                    <!-- Danh sách tài khoản ngân hàng sẽ được hiển thị ở đây -->
+                                    <div class="text-center text-muted p-3">
+                                        <i class="fas fa-info-circle me-2"></i>Chưa có tài khoản ngân hàng nào
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ví điện tử -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Ví điện tử</h6>
+                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#walletModal">
+                                        <i class="fas fa-plus me-1"></i> Liên kết ví
+                                    </button>
+                                </div>
+                                <div id="wallets" class="list-group">
+                                    <!-- Danh sách ví điện tử sẽ được hiển thị ở đây -->
+                                    <div class="text-center text-muted p-3">
+                                        <i class="fas fa-info-circle me-2"></i>Chưa có ví điện tử nào
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm tài khoản ngân hàng -->
+<div class="modal fade" id="bankAccountModal" tabindex="-1" aria-labelledby="bankAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bankAccountModalLabel">Thêm tài khoản ngân hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bankAccountForm">
+                    <div class="mb-3">
+                        <label for="bankName" class="form-label">Tên ngân hàng</label>
+                        <select class="form-select" id="bankName" name="bank_name" required>
+                            <option value="">Chọn ngân hàng</option>
+                            <option value="Vietcombank">Vietcombank</option>
+                            <option value="BIDV">BIDV</option>
+                            <option value="Agribank">Agribank</option>
+                            <option value="Techcombank">Techcombank</option>
+                            <option value="MB Bank">MB Bank</option>
+                            <option value="ACB">ACB</option>
+                            <option value="TPBank">TPBank</option>
+                            <option value="VPBank">VPBank</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accountNumber" class="form-label">Số tài khoản</label>
+                        <input type="text" class="form-control" id="accountNumber" name="account_number" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveBankAccount">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal liên kết ví điện tử -->
+<div class="modal fade" id="walletModal" tabindex="-1" aria-labelledby="walletModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="walletModalLabel">Liên kết ví điện tử</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="walletForm">
+                    <div class="mb-3">
+                        <label for="walletType" class="form-label">Loại ví</label>
+                        <select class="form-select" id="walletType" name="wallet_type" required>
+                            <option value="">Chọn loại ví</option>
+                            <option value="MoMo">MoMo</option>
+                            <option value="ZaloPay">ZaloPay</option>
+                            <option value="VNPay">VNPay</option>
+                            <option value="ViettelPay">ViettelPay</option>
+                            <option value="ShopeePay">ShopeePay</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="initialBalance" class="form-label">Số dư ban đầu (VND)</label>
+                        <input type="number" class="form-control" id="initialBalance" name="balance" min="0" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveWallet">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Lấy danh sách tài khoản ngân hàng khi trang tải
+        function loadBankAccounts() {
+            $.get('/api/bank-accounts', function(data) {
+                if (data.success && data.accounts.length > 0) {
+                    let html = '';
+                    $.each(data.accounts, function(index, account) {
+                        html += `
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">${account.bank_name}</h6>
+                                    <small class="text-muted">**** **** **** ${account.last_4_digits}</small>
+                                </div>
+                                <button class="btn btn-sm btn-danger delete-bank" data-id="${account.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    $('#bankAccounts').html(html);
+                } else {
+                    $('#bankAccounts').html('<div class="text-center text-muted p-3"><i class="fas fa-info-circle me-2"></i>Chưa có tài khoản ngân hàng nào</div>');
+                }
+            });
+        }
+
+        // Lấy danh sách ví điện tử khi trang tải
+        function loadWallets() {
+            $.get('/api/wallets', function(data) {
+                if (data.success && data.wallets.length > 0) {
+                    let html = '';
+                    $.each(data.wallets, function(index, wallet) {
+                        html += `
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">${wallet.wallet_type}</h6>
+                                    <small class="text-muted">Số dư: ${wallet.balance.toLocaleString('vi-VN')} VND</small>
+                                </div>
+                                <button class="btn btn-sm btn-danger delete-wallet" data-id="${wallet.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    $('#wallets').html(html);
+                } else {
+                    $('#wallets').html('<div class="text-center text-muted p-3"><i class="fas fa-info-circle me-2"></i>Chưa có ví điện tử nào</div>');
+                }
+            });
+        }
+
+        // Thêm tài khoản ngân hàng
+        $('#saveBankAccount').click(function() {
+            var formData = $('#bankAccountForm').serialize();
+            $.ajax({
+                url: '/add_bank_account',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        $('#bankAccountModal').modal('hide');
+                        $('#bankAccountForm')[0].reset();
+                        loadBankAccounts();
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+                }
+            });
+        });
+
+        // Thêm ví điện tử
+        $('#saveWallet').click(function() {
+            var formData = $('#walletForm').serialize();
+            $.ajax({
+                url: '/link_wallet',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        $('#walletModal').modal('hide');
+                        $('#walletForm')[0].reset();
+                        loadWallets();
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+                }
+            });
+        });
+
+        // Xóa tài khoản ngân hàng
+        $(document).on('click', '.delete-bank', function() {
+            var id = $(this).data('id');
+            if (confirm('Bạn có chắc chắn muốn xóa tài khoản ngân hàng này?')) {
+                $.ajax({
+                    url: '/delete_bank_account/' + id,
+                    type: 'DELETE',
+                    success: function(response) {
+                        if (response.success) {
+                            loadBankAccounts();
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+                    }
+                });
+            }
+        });
+
+        // Tải dữ liệu khi trang tải
+        loadBankAccounts();
+        loadWallets();
+    });
+</script>
+{% endblock %}
+{% endblock %} 

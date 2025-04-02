@@ -1,0 +1,750 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        height: 90vh;
+        min-height: 700px;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ url_for('static', filename='image/hero/hero.jpg') }}');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+    }
+
+    .hero-content {
+        text-align: center;
+        width: 100%;
+    }
+
+    .hero-title {
+        font-size: 3.7rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-subtitle {
+        font-size: 1.6rem;
+        margin-bottom: 2.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-hero {
+        padding: 1.2rem 3rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    .btn-hero:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Common Section Styles */
+    .section {
+        padding: 6rem 0;
+    }
+
+    .section-title {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 3.5rem;
+        position: relative;
+        font-size: 2.5rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        width: 100px;
+        height: 4px;
+        background-color: var(--primary-color);
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    /* Map Section */
+    .map-section {
+        background-color: #f9f9f9;
+        position: relative;
+        padding: 6rem 0;
+    }
+
+    .map-container {
+        height: 450px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .map-info {
+        padding: 2rem;
+    }
+
+    .map-info h2 {
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .map-feature {
+        margin-bottom: 1.5rem;
+    }
+
+    .map-feature-icon {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(0, 177, 79, 0.1);
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        margin-right: 1.2rem;
+    }
+
+    /* Benefits Section */
+    .benefits-section {
+        background-color: white;
+    }
+
+    .benefit-card {
+        transition: all 0.4s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    .benefit-icon-wrapper {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 177, 79, 0.1);
+        border-radius: 50%;
+    }
+
+    .benefit-icon {
+        font-size: 2.8rem;
+        color: var(--primary-color);
+    }
+
+    /* About Section */
+    .about-section-wrapper {
+        background-color: rgba(0, 0, 0, 0.02);
+        border-radius: 25px;
+        padding: 4rem;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+    }
+
+    .about-text h3 {
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .about-carousel .carousel-item img {
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        height: 450px;
+        object-fit: cover;
+    }
+
+    .about-carousel .carousel-indicators {
+        bottom: -40px;
+    }
+
+    .about-carousel .carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin: 0 5px;
+    }
+
+    .about-feature {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .about-check {
+        color: var(--primary-color);
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+
+    /* Testimonials Section */
+    .testimonials-section {
+        background-color: #f9f9f9;
+    }
+
+    .testimonial-card {
+        padding: 2.5rem;
+        border-radius: 15px;
+        background-color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+
+    .testimonial-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .testimonial-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--primary-color);
+        margin-right: 1.5rem;
+    }
+
+    .testimonial-info h5 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .testimonial-rating {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+
+    .testimonial-text {
+        font-style: italic;
+        color: #555;
+        line-height: 1.8;
+    }
+
+    /* News Section */
+    .news-section {
+        padding-bottom: 8rem;
+    }
+    
+    .news-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: all 0.4s ease;
+        height: 100%;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .news-img {
+        height: 220px;
+        object-fit: cover;
+    }
+    
+    .news-content {
+        padding: 1.5rem 2rem 2rem;
+    }
+    
+    .news-date {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 0.8rem;
+    }
+    
+    .news-title {
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+    
+    .news-text {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .news-carousel .carousel-control-prev,
+    .news-carousel .carousel-control-next {
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.9;
+    }
+    
+    .news-carousel .carousel-control-prev {
+        left: -25px;
+    }
+    
+    .news-carousel .carousel-control-next {
+        right: -25px;
+    }
+    
+    .news-carousel .carousel-control-prev:hover,
+    .news-carousel .carousel-control-next:hover {
+        opacity: 1;
+    }
+
+    @media (max-width: 991px) {
+        .hero-title {
+            font-size: 3rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+        }
+        
+        .about-section-wrapper {
+            padding: 2.5rem;
+        }
+        
+        .news-carousel .carousel-control-prev,
+        .news-carousel .carousel-control-next {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" id="hero">
+    <div class="container hero-content">
+        <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">ShareGeb - Chia sẻ chuyến đi, tiết kiệm chi phí</h1>
+        <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">Kết nối hành khách cùng điểm đến, tạo nên cộng đồng di chuyển thông minh và thân thiện với môi trường</p>
+        <a href="{% if current_user.is_authenticated %}{{ url_for('book_ride.book_ride') }}{% else %}{{ url_for('users.login') }}{% endif %}" class="btn btn-hero btn-primary" data-aos="fade-up" data-aos-delay="300">
+            <i class="fas fa-car me-2"></i> Đặt xe ngay
+        </a>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8" data-aos="fade-right">
+                <div class="map-container">
+                    <div id="map" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+            <div class="col-lg-4" data-aos="fade-left">
+                <div class="map-info">
+                    <h2>Xe luôn sẵn sàng</h2>
+                    <p class="lead mb-4">Theo dõi trực tiếp vị trí xe gần bạn nhất và đặt xe ngay trong vài giây.</p>
+                    
+                    <div class="d-flex map-feature">
+                        <div class="map-feature-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <div>
+                            <h5>Phủ sóng toàn thành phố</h5>
+                            <p class="text-muted">Dịch vụ hoạt động khắp Hà Nội với hàng trăm tài xế luôn sẵn sàng.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex map-feature">
+                        <div class="map-feature-icon">
+                            <i class="fas fa-location-arrow"></i>
+                        </div>
+                        <div>
+                            <h5>Theo dõi thời gian thực</h5>
+                            <p class="text-muted">Xem chính xác vị trí xe và thời gian đón, không phải chờ đợi lâu.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex map-feature">
+                        <div class="map-feature-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div>
+                            <h5>Đặt xe trước</h5>
+                            <p class="text-muted">Lên lịch đặt xe trước vài giờ hoặc vài ngày, lịch trình linh hoạt.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="section benefits-section">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Lợi ích khi sử dụng ShareGeb</h2>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up">
+                <div class="card benefit-card text-center p-4">
+                    <div class="card-body">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fas fa-piggy-bank benefit-icon"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Tiết kiệm tiền</h4>
+                        <p class="card-text">Chia sẻ chi phí, giảm giá lên đến 50% so với đi xe riêng. Tối ưu ngân sách di chuyển của bạn.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card benefit-card text-center p-4">
+                    <div class="card-body">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fas fa-shield-alt benefit-icon"></i>
+                        </div>
+                        <h4 class="card-title mb-3">An toàn</h4>
+                        <p class="card-text">Theo dõi GPS thời gian thực, xác thực tài xế và hành khách, chính sách an toàn chặt chẽ.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card benefit-card text-center p-4">
+                    <div class="card-body">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fas fa-bolt benefit-icon"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Tiện lợi</h4>
+                        <p class="card-text">Đặt xe nhanh chóng, không cần chờ lâu. Giao diện đơn giản, dễ sử dụng cho mọi người.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="card benefit-card text-center p-4">
+                    <div class="card-body">
+                        <div class="benefit-icon-wrapper">
+                            <i class="fas fa-users benefit-icon"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Gặp gỡ</h4>
+                        <p class="card-text">Kết nối với hành khách khác, mở rộng mối quan hệ và tạo nên những cuộc trò chuyện thú vị.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Us Section -->
+<section class="section" id="about-us">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Về chúng tôi</h2>
+        <div class="about-section-wrapper">
+            <div class="row">
+                <div class="col-lg-5 about-text" data-aos="fade-right">
+                    <h3>ShareGeb - Giải pháp di chuyển thông minh</h3>
+                    <p class="mb-4">
+                        ShareGeb ra đời với sứ mệnh xây dựng một nền tảng chia sẻ chuyến đi hiệu quả, thân thiện và tiết kiệm cho người dùng tại Việt Nam.
+                    </p>
+                    <p class="mb-4">
+                        Chúng tôi tin rằng việc chia sẻ chuyến đi không chỉ giúp giảm chi phí di chuyển, mà còn góp phần bảo vệ môi trường, giảm ùn tắc giao thông và tạo ra một cộng đồng kết nối.
+                    </p>
+                    <p class="mb-4">
+                        Với đội ngũ nhân viên trẻ, năng động và đầy sáng tạo, ShareGeb không ngừng cải tiến để mang đến trải nghiệm tốt nhất cho người dùng.
+                    </p>
+                    <div class="about-feature">
+                        <i class="fas fa-check-circle about-check"></i>
+                        <p class="mb-0">Thành lập năm 2020 tại Hà Nội</p>
+                    </div>
+                    <div class="about-feature">
+                        <i class="fas fa-check-circle about-check"></i>
+                        <p class="mb-0">Hơn 10,000 chuyến đi mỗi ngày</p>
+                    </div>
+                    <div class="about-feature">
+                        <i class="fas fa-check-circle about-check"></i>
+                        <p class="mb-0">Mạng lưới 5,000+ tài xế đối tác</p>
+                    </div>
+                </div>
+                <div class="col-lg-7" data-aos="fade-left">
+                    <div id="aboutCarousel" class="carousel slide about-carousel" data-bs-ride="carousel" data-bs-interval="2000">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#aboutCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#aboutCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#aboutCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="{{ url_for('static', filename='image/about/about-1.png') }}" class="d-block w-100" alt="About ShareGeb">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="{{ url_for('static', filename='image/about/about-2.jpg') }}" class="d-block w-100" alt="Our Mission">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="{{ url_for('static', filename='image/about/about-3.jpg') }}" class="d-block w-100" alt="Our Team">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="section testimonials-section">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Khách hàng nói gì về chúng tôi</h2>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <img src="{{ url_for('static', filename='image/testimonials/testimonial-1.jpg') }}" alt="Nguyễn Văn A" class="testimonial-avatar">
+                        <div class="testimonial-info">
+                            <h5>Nguyễn Văn A</h5>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">
+                        "Tôi sử dụng ShareGeb mỗi ngày để đi làm. Tiết kiệm được rất nhiều tiền và còn kết bạn được với nhiều người thú vị. Trải nghiệm tuyệt vời!"
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <img src="{{ url_for('static', filename='image/testimonials/testimonial-1.jpg') }}" alt="Trần Thị B" class="testimonial-avatar">
+                        <div class="testimonial-info">
+                            <h5>Trần Thị B</h5>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">
+                        "Ứng dụng rất dễ sử dụng, tài xế lịch sự và chuyên nghiệp. Giá cả phải chăng hơn nhiều so với taxi thông thường. Đặc biệt thích tính năng theo dõi xe trực tiếp."
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <img src="{{ url_for('static', filename='image/testimonials/testimonial-1.jpg') }}" alt="Lê Văn C" class="testimonial-avatar">
+                        <div class="testimonial-info">
+                            <h5>Lê Văn C</h5>
+                            <div class="testimonial-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">
+                        "Tôi là tài xế đối tác với ShareGeb. Ứng dụng rất ổn định, hỗ trợ nhiệt tình và thu nhập khá tốt. Cảm ơn ShareGeb đã tạo cơ hội cho tôi!"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- News Section -->
+<section class="section news-section" id="news">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Tin tức & Sự kiện</h2>
+        <div class="position-relative" data-aos="fade-up">
+            <div id="newsCarousel" class="carousel slide news-carousel" data-bs-ride="false">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="news-card">
+                                    <img src="{{ url_for('static', filename='image/news/news-1.jpg') }}" class="news-img w-100" alt="Tin tức">
+                                    <div class="news-content">
+                                        <span class="news-date">15 Tháng 3, 2023</span>
+                                        <h5 class="news-title">ShareGeb mở rộng dịch vụ đến Đà Nẵng</h5>
+                                        <p class="news-text">Sau thành công tại Hà Nội, ShareGeb chính thức mở rộng dịch vụ đến thành phố Đà Nẵng từ tháng 4/2023.</p>
+                                        <a href="#" class="btn btn-outline-primary">Xem thêm</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="news-card">
+                                    <img src="{{ url_for('static', filename='image/news/news-2.jpg') }}" class="news-img w-100" alt="Tin tức">
+                                    <div class="news-content">
+                                        <span class="news-date">01 Tháng 3, 2023</span>
+                                        <h5 class="news-title">ShareGeb nhận giải thưởng Startup xuất sắc 2023</h5>
+                                        <p class="news-text">ShareGeb vinh dự nhận giải thưởng "Startup xuất sắc 2023" trong lĩnh vực công nghệ vận tải.</p>
+                                        <a href="#" class="btn btn-outline-primary">Xem thêm</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="news-card">
+                                    <img src="{{ url_for('static', filename='image/news/news-3.jpg') }}" class="news-img w-100" alt="Tin tức">
+                                    <div class="news-content">
+                                        <span class="news-date">20 Tháng 2, 2023</span>
+                                        <h5 class="news-title">Chương trình khách hàng thân thiết mới</h5>
+                                        <p class="news-text">ShareGeb ra mắt chương trình khách hàng thân thiết với nhiều ưu đãi hấp dẫn cho người dùng.</p>
+                                        <a href="#" class="btn btn-outline-primary">Xem thêm</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="news-card">
+                                    <img src="{{ url_for('static', filename='image/news/news-4.jpg') }}" class="news-img w-100" alt="Tin tức">
+                                    <div class="news-content">
+                                        <span class="news-date">10 Tháng 2, 2023</span>
+                                        <h5 class="news-title">ShareGeb hợp tác với các doanh nghiệp lớn</h5>
+                                        <p class="news-text">ShareGeb ký kết hợp tác với các doanh nghiệp lớn để cung cấp dịch vụ đưa đón nhân viên.</p>
+                                        <a href="#" class="btn btn-outline-primary">Xem thêm</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="news-card">
+                                    <img src="{{ url_for('static', filename='image/news/news-5.jpg') }}" class="news-img w-100" alt="Tin tức">
+                                    <div class="news-content">
+                                        <span class="news-date">28 Tháng 1, 2023</span>
+                                        <h5 class="news-title">ShareGeb cán mốc 1 triệu chuyến đi</h5>
+                                        <p class="news-text">Chỉ sau 2 năm hoạt động, ShareGeb đã đạt mốc 1 triệu chuyến đi, đánh dấu cột mốc phát triển quan trọng.</p>
+                                        <a href="#" class="btn btn-outline-primary">Xem thêm</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="news-card">
+                                    <img src="{{ url_for('static', filename='image/news/news-6.jpg') }}" class="news-img w-100" alt="Tin tức">
+                                    <div class="news-content">
+                                        <span class="news-date">15 Tháng 1, 2023</span>
+                                        <h5 class="news-title">ShareGeb ra mắt tính năng mới</h5>
+                                        <p class="news-text">ShareGeb cập nhật ứng dụng với nhiều tính năng mới, nâng cao trải nghiệm người dùng.</p>
+                                        <a href="#" class="btn btn-outline-primary">Xem thêm</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        var map = L.map('map').setView([21.0285, 105.8542], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add some sample cars to the map
+        var carIcon = L.icon({
+            iconUrl: "{{ url_for('static', filename='image/car-icon.png') }}",
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+        
+        // Sample car locations
+        var cars = [
+            {lat: 21.0285, lng: 105.8542},
+            {lat: 21.0305, lng: 105.8462},
+            {lat: 21.0225, lng: 105.8492},
+            {lat: 21.0345, lng: 105.8612},
+            {lat: 21.0195, lng: 105.8382},
+            {lat: 21.0275, lng: 105.8652},
+            {lat: 21.0185, lng: 105.8532}
+        ];
+        
+        // Add markers for each car
+        cars.forEach(function(car) {
+            L.marker([car.lat, car.lng], {icon: carIcon}).addTo(map);
+        });
+        
+        // About carousel auto slide
+        var aboutCarousel = document.getElementById('aboutCarousel');
+        if (aboutCarousel) {
+            var carousel = new bootstrap.Carousel(aboutCarousel, {
+                interval: 2000
+            });
+        }
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

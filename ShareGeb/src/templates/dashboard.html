@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('book_ride.book_ride') }}" class="btn btn-primary">
+                            <i class="fas fa-car"></i> Đặt xe
+                        </a>
+                        <a href="{{ url_for('payment.payment') }}" class="btn btn-secondary">
+                            <i class="fas fa-wallet"></i> Add Payment
+                        </a>
+                        <a href="{{ url_for('discounts.discounts') }}" class="btn btn-info">
+                            <i class="fas fa-tag"></i> Promo Codes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Section -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Map</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-controls">
+                            <button id="locate-me" class="btn btn-primary">
+                                <i class="fas fa-location-arrow"></i> My Location
+                            </button>
+                            <button id="reset-view" class="btn btn-secondary">
+                                <i class="fas fa-sync"></i> Reset View
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Rides -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Upcoming Rides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">To: Airport</h6>
+                                <small>Tomorrow, 8:00 AM</small>
+                            </div>
+                            <p class="mb-1">Status: Confirmed</p>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">To: City Center</h6>
+                                <small>Tomorrow, 2:00 PM</small>
+                            </div>
+                            <p class="mb-1">Status: Pending</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.map-container {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+#map {
+    height: 500px;
+    width: 100%;
+    z-index: 1;
+}
+
+.map-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.map-controls .btn {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+.map-controls .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.map-controls .btn i {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    #map {
+        height: 300px;
+    }
+    
+    .map-controls .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map
+    var map = L.map('map').setView([21.0285, 105.8542], 13); // Hanoi coordinates
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add markers for popular locations
+    var locations = [
+        { name: 'Hồ Hoàn Kiếm', coords: [21.0285, 105.8542] },
+        { name: 'Hồ Tây', coords: [21.0567, 105.8194] },
+        { name: 'Văn Miếu Quốc Tử Giám', coords: [21.0278, 105.8356] }
+    ];
+
+    locations.forEach(function(loc) {
+        L.marker(loc.coords)
+            .bindPopup(loc.name)
+            .addTo(map);
+    });
+
+    // Locate me button
+    document.getElementById('locate-me').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                map.setView([position.coords.latitude, position.coords.longitude], 15);
+                L.marker([position.coords.latitude, position.coords.longitude])
+                    .bindPopup('Your Location')
+                    .addTo(map);
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    });
+
+    // Reset view button
+    document.getElementById('reset-view').addEventListener('click', function() {
+        map.setView([21.0285, 105.8542], 13);
+    });
+});
+</script>
+{% endblock %}

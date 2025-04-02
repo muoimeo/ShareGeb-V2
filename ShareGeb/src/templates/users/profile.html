@@ -1,0 +1,833 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card profile-card">
+                <div class="card-body">
+
+                    <!-- Profile Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thông tin cá nhân</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profile-form" class="needs-validation" enctype="multipart/form-data" novalidate>
+                                <div class="row mb-3">
+                                    <div class="col-md-4 text-center">
+                                        <img id="avatar-preview" src="{{ url_for('static', filename='image/avatars/basic_avatar.png') }}" 
+                                             class="rounded-circle img-thumbnail" alt="Avatar" style="width: 150px; height: 150px; object-fit: cover;">
+                                        <div class="mt-3">
+                                            <label for="avatar" class="btn btn-outline-primary btn-sm">
+                                                Thay đổi ảnh đại diện
+                                            </label>
+                                            <input type="file" id="avatar" name="avatar" class="d-none" accept="image/*">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            <label for="full_name" class="form-label">Họ và tên</label>
+                                            <input type="text" class="form-control" id="full_name" name="full_name" 
+                                                   value="{{ user.full_name }}" required>
+                                            <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                        </div>
+                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" name="email" 
+                                                   value="{{ user.email }}" required>
+                                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                        </div>
+                        <div class="mb-3">
+                                            <label for="phone" class="form-label">Số điện thoại</label>
+                                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                                   value="{{ user.phone }}" required>
+                                            <div class="invalid-feedback">Vui lòng nhập số điện thoại</div>
+                        </div>
+                        <div class="mb-3">
+                                            <label for="bio" class="form-label">Giới thiệu bản thân</label>
+                                            <textarea class="form-control" id="bio" name="bio" rows="3">{{ user.bio or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sở thích</label>
+                                            <div class="row">
+                                                {% set interests = user.interests.split(',') if user.interests else [] %}
+                                                <div class="col-md-4">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="interests" value="music"
+                                                               id="interest_music" {% if 'music' in interests %}checked{% endif %}>
+                                                        <label class="form-check-label" for="interest_music">Âm nhạc</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="interests" value="sports"
+                                                               id="interest_sports" {% if 'sports' in interests %}checked{% endif %}>
+                                                        <label class="form-check-label" for="interest_sports">Thể thao</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="interests" value="travel"
+                                                               id="interest_travel" {% if 'travel' in interests %}checked{% endif %}>
+                                                        <label class="form-check-label" for="interest_travel">Du lịch</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Display Information -->
+                    <div class="d-none">
+                        <span id="display-name">{{ user.full_name }}</span>
+                        <span id="display-email">{{ user.email }}</span>
+                        <span id="display-phone">{{ user.phone }}</span>
+                        </div>
+
+                        <!-- Payment Methods Section -->
+                        <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Phương thức thanh toán</h5>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="togglePaymentMethods">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        
+                        <div id="paymentMethodsContainer" class="collapse">
+                            <!-- Bank Accounts -->
+                            <div class="card mb-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0"><i class="fas fa-university me-2"></i>Tài khoản ngân hàng</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="toggleBankAccountForm">
+                                        <i class="fas fa-plus"></i> Thêm
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <!-- List of existing bank accounts -->
+                                    <div id="bankAccountsList">
+                                        {% if user.bank_accounts and user.bank_accounts|length > 0 %}
+                                            {% for account in user.bank_accounts %}
+                                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                                <div>
+                                                    <strong>{{ account.bank_name }}</strong>
+                                                    <div class="text-muted small">**** {{ account.last_4_digits }}</div>
+                                                </div>
+                                                <a href="#" class="btn btn-sm btn-danger delete-bank-account" data-id="{{ account.account_id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="text-center text-muted p-3">
+                                                <i class="fas fa-info-circle me-2"></i>Chưa có tài khoản ngân hàng nào
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Form to add new bank account (initially hidden) -->
+                                    <div id="bankAccountForm" class="mt-3 collapse">
+                                        <hr>
+                                        <h6 class="mb-3">Thêm tài khoản ngân hàng</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Ngân hàng <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="newBankName" required>
+                                                <option value="">-- Chọn ngân hàng --</option>
+                                                <option value="BIDV">BIDV - Ngân hàng Đầu tư và Phát triển Việt Nam</option>
+                                                <option value="Vietcombank">Vietcombank - Ngân hàng Ngoại thương Việt Nam</option>
+                                                <option value="VietinBank">VietinBank - Ngân hàng Công thương Việt Nam</option>
+                                                <option value="Agribank">Agribank - Ngân hàng Nông nghiệp và Phát triển Nông thôn</option>
+                                                <option value="TPBank">TPBank - Ngân hàng Tiên Phong</option>
+                                                <option value="Techcombank">Techcombank - Ngân hàng Kỹ thương Việt Nam</option>
+                                                <option value="MBBank">MBBank - Ngân hàng Quân đội</option>
+                                                <option value="ACB">ACB - Ngân hàng Á Châu</option>
+                                                <option value="VPBank">VPBank - Ngân hàng Việt Nam Thịnh Vượng</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Số tài khoản <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="newAccountNumber" placeholder="VD: 1234567890">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên chủ tài khoản <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="newAccountHolder" placeholder="VD: NGUYEN VAN A">
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-secondary me-2" id="cancelBankAccount">Hủy</button>
+                                            <button type="button" class="btn btn-primary" id="saveBankAccount">Lưu</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Credit Cards -->
+                            <div class="card mb-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0"><i class="fas fa-credit-card me-2"></i>Thẻ tín dụng/ghi nợ</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="toggleCreditCardForm">
+                                        <i class="fas fa-plus"></i> Thêm
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <!-- List of existing credit cards -->
+                                    <div id="creditCardsList">
+                                        {% if user.credit_cards and user.credit_cards|length > 0 %}
+                                            {% for card in user.credit_cards %}
+                                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                                <div>
+                                                    <strong>{{ card.card_type }}</strong>
+                                                    <div class="text-muted small">**** {{ card.last_4_digits }}</div>
+                                                </div>
+                                                <a href="#" class="btn btn-sm btn-danger delete-credit-card" data-id="{{ card.card_id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="text-center text-muted p-3">
+                                                <i class="fas fa-info-circle me-2"></i>Chưa có thẻ tín dụng/ghi nợ nào
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Form to add new credit card (initially hidden) -->
+                                    <div id="creditCardForm" class="mt-3 collapse">
+                                        <hr>
+                                        <h6 class="mb-3">Thêm thẻ tín dụng/ghi nợ</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Loại thẻ <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="newCardType" required>
+                                                <option value="">-- Chọn loại thẻ --</option>
+                                                <option value="Visa">Visa</option>
+                                                <option value="MasterCard">MasterCard</option>
+                                                <option value="JCB">JCB</option>
+                                                <option value="American Express">American Express</option>
+                                            </select>
+                                        </div>
+                                    <div class="mb-3">
+                                            <label class="form-label">Số thẻ <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="newCardNumber" placeholder="VD: 4111111111111111">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Tháng hết hạn <span class="text-danger">*</span></label>
+                                                <select class="form-select" id="newExpiryMonth" required>
+                                                    <option value="">MM</option>
+                                                    {% for i in range(1, 13) %}
+                                                    <option value="{{ '%02d'|format(i) }}">{{ '%02d'|format(i) }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Năm hết hạn <span class="text-danger">*</span></label>
+                                                <select class="form-select" id="newExpiryYear" required>
+                                                    <option value="">YY</option>
+                                                    {% for i in range(now.year|int % 100, (now.year|int % 100) + 10) %}
+                                                    <option value="{{ '%02d'|format(i) }}">{{ '%02d'|format(i) }}</option>
+                                                    {% endfor %}
+                                        </select>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên chủ thẻ <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="newCardHolder" placeholder="VD: NGUYEN VAN A">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">CVV <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="newCvv" placeholder="VD: 123">
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-secondary me-2" id="cancelCreditCard">Hủy</button>
+                                            <button type="button" class="btn btn-primary" id="saveCreditCard">Lưu</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- E-wallets -->
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0"><i class="fas fa-wallet me-2"></i>Ví điện tử</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="toggleWalletForm">
+                                        <i class="fas fa-plus"></i> Thêm
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <!-- List of existing wallets -->
+                                    <div id="walletsList">
+                                        {% if user.wallets and user.wallets|length > 0 %}
+                                            {% for wallet in user.wallets %}
+                                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                                <div>
+                                                    <strong>{{ wallet.currency }}</strong>
+                                                    <div class="text-muted small">{{ wallet.balance|round|int }} VND</div>
+                                                </div>
+                                                <a href="#" class="btn btn-sm btn-danger delete-wallet" data-id="{{ wallet.wallet_id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="text-center text-muted p-3">
+                                                <i class="fas fa-info-circle me-2"></i>Chưa có ví điện tử nào
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Form to add new wallet (initially hidden) -->
+                                    <div id="walletForm" class="mt-3 collapse">
+                                        <hr>
+                                        <h6 class="mb-3">Thêm ví điện tử</h6>
+                                    <div class="mb-3">
+                                            <label class="form-label">Loại ví <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="newWalletType" required>
+                                                <option value="">-- Chọn loại ví --</option>
+                                                <option value="MoMo">MoMo</option>
+                                                <option value="ZaloPay">ZaloPay</option>
+                                                <option value="VNPay">VNPay</option>
+                                                <option value="ViettelPay">ViettelPay</option>
+                                                <option value="ShopeePay">ShopeePay</option>
+                                        </select>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-secondary me-2" id="cancelWallet">Hủy</button>
+                                            <button type="button" class="btn btn-primary" id="saveWallet">Lưu</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.avatar-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 2rem;
+}
+
+.avatar {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #f8f9fa;
+    padding: 8px;
+}
+
+.avatar-edit {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border: 2px solid #0d6efd;
+    color: #0d6efd;
+    transition: all 0.2s ease;
+}
+
+.avatar-edit:hover {
+    background-color: #0d6efd;
+    color: white;
+    transform: scale(1.1);
+}
+
+.form-check {
+    margin-right: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const profileForm = document.getElementById('profile-form');
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatar-preview');
+    
+    // Preview avatar image when selected
+    avatarInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+        reader.onload = function(e) {
+                avatarPreview.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle form submission
+    profileForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Validate form
+        if (!this.checkValidity()) {
+            e.stopPropagation();
+            this.classList.add('was-validated');
+            return;
+        }
+
+        const formData = new FormData(this);
+        
+        // Get selected interests
+        const selectedInterests = [];
+        document.querySelectorAll('input[name="interests"]:checked').forEach(checkbox => {
+            selectedInterests.push(checkbox.value);
+        });
+        formData.set('interests', selectedInterests.join(','));
+
+        try {
+            const response = await fetch('/profile', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Hiển thị alert thành công
+                alert('Cập nhật thông tin thành công!');
+                // Reload trang sau khi đóng alert
+                window.location.reload();
+            } else {
+                showAlert('danger', data.message || 'Có lỗi xảy ra khi cập nhật thông tin.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi kết nối với máy chủ.');
+        }
+    });
+
+    // Function to show alerts
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        // Insert alert before the form
+        profileForm.parentNode.insertBefore(alertDiv, profileForm);
+        
+        // Auto dismiss after 3 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Toggle payment methods section
+    const togglePaymentMethodsBtn = document.getElementById('togglePaymentMethods');
+    const paymentMethodsContainer = document.getElementById('paymentMethodsContainer');
+    
+    togglePaymentMethodsBtn.addEventListener('click', function() {
+        $(paymentMethodsContainer).collapse('toggle');
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-chevron-down');
+        icon.classList.toggle('fa-chevron-up');
+    });
+
+    // Toggle bank account form
+    const toggleBankAccountBtn = document.getElementById('toggleBankAccountForm');
+    const bankAccountForm = document.getElementById('bankAccountForm');
+    
+    toggleBankAccountBtn.addEventListener('click', function() {
+        $(bankAccountForm).collapse('toggle');
+    });
+
+    // Toggle credit card form
+    const toggleCreditCardBtn = document.getElementById('toggleCreditCardForm');
+    const creditCardForm = document.getElementById('creditCardForm');
+    
+    toggleCreditCardBtn.addEventListener('click', function() {
+        $(creditCardForm).collapse('toggle');
+    });
+
+    // Toggle wallet form
+    const toggleWalletBtn = document.getElementById('toggleWalletForm');
+    const walletForm = document.getElementById('walletForm');
+    
+    toggleWalletBtn?.addEventListener('click', function() {
+        $(walletForm).collapse('toggle');
+    });
+
+    // Xử lý thêm thẻ tín dụng
+    const saveCreditCardBtn = document.getElementById('saveCreditCard');
+    
+    saveCreditCardBtn?.addEventListener('click', async function() {
+        const cardType = document.getElementById('newCardType').value;
+        const cardNumber = document.getElementById('newCardNumber').value;
+        const expiryMonth = document.getElementById('newExpiryMonth').value;
+        const expiryYear = document.getElementById('newExpiryYear').value;
+        const cardHolder = document.getElementById('newCardHolder').value;
+        const cvv = document.getElementById('newCvv').value;
+        
+        // Hiển thị lỗi ngay trên form
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mb-3';
+        
+        if (!cardType || !cardNumber || !expiryMonth || !expiryYear || !cardHolder || !cvv) {
+            errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin thẻ';
+            const form = document.getElementById('creditCardForm');
+            form.insertBefore(errorDiv, form.firstChild);
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('card_type', cardType);
+        formData.append('card_number', cardNumber);
+        formData.append('expiry_month', expiryMonth);
+        formData.append('expiry_year', expiryYear);
+        formData.append('card_holder', cardHolder);
+        formData.append('cvv', cvv);
+        
+        try {
+            const response = await fetch('/payment/add_credit_card', {
+        method: 'POST',
+        body: formData
+            });
+            
+            const data = await response.json();
+            
+        if (data.success) {
+                showAlert('success', 'Thêm thẻ thành công');
+                
+                // Tạo phần tử hiển thị thẻ mới
+                const cardElement = document.createElement('div');
+                cardElement.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+                
+                cardElement.innerHTML = `
+                    <div>
+                        <strong>${data.card.card_type}</strong>
+                        <div class="text-muted small">**** ${data.card.last_4_digits}</div>
+                    </div>
+                    <a href="#" class="btn btn-sm btn-danger delete-credit-card" data-id="${data.card.card_id}">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                `;
+                
+                // Xóa thông báo "chưa có thẻ" nếu có
+                const emptyMessage = document.querySelector('#creditCardsList .text-center.text-muted');
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+                
+                // Thêm thẻ mới vào danh sách
+                document.getElementById('creditCardsList').appendChild(cardElement);
+                
+                // Đóng form thêm thẻ
+                $(creditCardForm).collapse('hide');
+                
+                // Xóa dữ liệu đã nhập
+                document.getElementById('newCardType').value = '';
+                document.getElementById('newCardNumber').value = '';
+                document.getElementById('newExpiryMonth').value = '';
+                document.getElementById('newExpiryYear').value = '';
+                document.getElementById('newCardHolder').value = '';
+                document.getElementById('newCvv').value = '';
+                
+                // Thêm event listener cho nút xóa
+                cardElement.querySelector('.delete-credit-card').addEventListener('click', handleDeleteCreditCard);
+        } else {
+                errorDiv.textContent = data.message || 'Có lỗi xảy ra khi thêm thẻ';
+                const form = document.getElementById('creditCardForm');
+                form.insertBefore(errorDiv, form.firstChild);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            errorDiv.textContent = 'Có lỗi xảy ra khi kết nối với máy chủ';
+            const form = document.getElementById('creditCardForm');
+            form.insertBefore(errorDiv, form.firstChild);
+        }
+});
+
+// Xử lý thêm tài khoản ngân hàng
+    const saveBankAccountBtn = document.getElementById('saveBankAccount');
+    
+    saveBankAccountBtn?.addEventListener('click', async function() {
+        const bankName = document.getElementById('newBankName').value;
+        const accountNumber = document.getElementById('newAccountNumber').value;
+        const accountHolder = document.getElementById('newAccountHolder').value;
+        
+        if (!bankName || !accountNumber || !accountHolder) {
+            showAlert('warning', 'Vui lòng điền đầy đủ thông tin tài khoản');
+        return;
+    }
+    
+        const formData = new FormData();
+        formData.append('bank_name', bankName);
+        formData.append('account_number', accountNumber);
+        formData.append('account_holder', accountHolder);
+        
+        try {
+            const response = await fetch('/payment/add_bank_account', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showAlert('success', 'Thêm tài khoản thành công');
+                
+                // Tạo phần tử hiển thị tài khoản mới
+                const accountElement = document.createElement('div');
+                accountElement.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+                
+                accountElement.innerHTML = `
+                    <div>
+                        <strong>${data.account.bank_name}</strong>
+                        <div class="text-muted small">**** ${data.account.account_number.slice(-4)}</div>
+                    </div>
+                    <a href="#" class="btn btn-sm btn-danger delete-bank-account" data-id="${data.account.id}">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                `;
+                
+                // Xóa thông báo "chưa có tài khoản" nếu có
+                const emptyMessage = document.querySelector('#bankAccountsList .text-center.text-muted');
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+                
+                // Thêm tài khoản mới vào danh sách
+                document.getElementById('bankAccountsList').appendChild(accountElement);
+                
+                // Đóng form thêm tài khoản
+                $(bankAccountForm).collapse('hide');
+                
+                // Xóa dữ liệu đã nhập
+                document.getElementById('newBankName').value = '';
+                document.getElementById('newAccountNumber').value = '';
+                document.getElementById('newAccountHolder').value = '';
+                
+                // Thêm event listener cho nút xóa
+                accountElement.querySelector('.delete-bank-account').addEventListener('click', handleDeleteBankAccount);
+            } else {
+                showAlert('danger', data.message || 'Có lỗi xảy ra khi thêm tài khoản');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi kết nối với máy chủ');
+        }
+    });
+    
+    // Xử lý thêm ví điện tử
+    const saveWalletBtn = document.getElementById('saveWallet');
+    
+    saveWalletBtn?.addEventListener('click', async function() {
+        const walletType = document.getElementById('newWalletType').value;
+        
+        // Hiển thị lỗi ngay trên form
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mb-3';
+        
+        if (!walletType) {
+            errorDiv.textContent = 'Vui lòng chọn loại ví';
+            const form = document.getElementById('walletForm');
+            form.insertBefore(errorDiv, form.firstChild);
+        return;
+    }
+    
+        const formData = new FormData();
+        formData.append('wallet_type', walletType);
+        
+        try {
+            const response = await fetch('/payment/add_ewallet', {
+        method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+        if (data.success) {
+                showAlert('success', 'Thêm ví thành công');
+                
+                // Tạo phần tử hiển thị ví mới
+                const walletElement = document.createElement('div');
+                walletElement.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+                
+                walletElement.innerHTML = `
+                    <div>
+                        <strong>${data.wallet.wallet_type}</strong>
+                        <div class="text-muted small">Số dư: 0 VND</div>
+                    </div>
+                    <a href="#" class="btn btn-sm btn-danger delete-wallet" data-id="${data.wallet.wallet_id}">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                `;
+                
+                // Xóa thông báo "chưa có ví" nếu có
+                const emptyMessage = document.querySelector('#walletsList .text-center.text-muted');
+                if (emptyMessage) {
+                    emptyMessage.remove();
+                }
+                
+                // Thêm ví mới vào danh sách
+                document.getElementById('walletsList').appendChild(walletElement);
+                
+                // Đóng form thêm ví
+                $(walletForm).collapse('hide');
+                
+                // Xóa dữ liệu đã nhập
+                document.getElementById('newWalletType').value = '';
+                
+                // Thêm event listener cho nút xóa
+                walletElement.querySelector('.delete-wallet').addEventListener('click', handleDeleteWallet);
+        } else {
+                errorDiv.textContent = data.message || 'Có lỗi xảy ra khi thêm ví';
+                const form = document.getElementById('walletForm');
+                form.insertBefore(errorDiv, form.firstChild);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            errorDiv.textContent = 'Có lỗi xảy ra khi kết nối với máy chủ';
+            const form = document.getElementById('walletForm');
+            form.insertBefore(errorDiv, form.firstChild);
+        }
+    });
+
+    // Function để xử lý sự kiện xóa thẻ tín dụng
+    function handleDeleteCreditCard(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn xóa thẻ này?')) {
+            const cardId = this.dataset.id;
+            deletePaymentMethod('credit_card', cardId, this.closest('div.d-flex'));
+        }
+    }
+    
+    // Function để xử lý sự kiện xóa tài khoản ngân hàng
+    function handleDeleteBankAccount(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn xóa tài khoản này?')) {
+            const accountId = this.dataset.id;
+            deletePaymentMethod('bank_account', accountId, this.closest('div.d-flex'));
+        }
+    }
+    
+    // Function để xử lý sự kiện xóa ví điện tử
+    function handleDeleteWallet(e) {
+        e.preventDefault();
+        if (confirm('Bạn có chắc chắn muốn xóa ví này?')) {
+            const walletId = this.dataset.id;
+            deletePaymentMethod('wallet', walletId, this.closest('div.d-flex'));
+        }
+    }
+    
+    // Function để xóa phương thức thanh toán
+    async function deletePaymentMethod(type, id, element) {
+        let url;
+        
+        switch (type) {
+            case 'credit_card':
+                url = `/payment/delete_credit_card/${id}`;
+                break;
+            case 'bank_account':
+                url = `/payment/delete_bank_account/${id}`;
+                break;
+            case 'wallet':
+                url = `/payment/delete_wallet/${id}`;
+                break;
+            default:
+                return;
+        }
+        
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+                if (data.success) {
+                showAlert('success', data.message);
+                
+                // Xóa phần tử ra khỏi DOM
+                element.remove();
+                
+                // Nếu không còn phần tử nào, hiển thị thông báo trống
+                let container;
+                let message;
+                
+                if (type === 'credit_card') {
+                    container = document.getElementById('creditCardsList');
+                    message = 'Chưa có thẻ tín dụng/ghi nợ nào';
+                } else if (type === 'bank_account') {
+                    container = document.getElementById('bankAccountsList');
+                    message = 'Chưa có tài khoản ngân hàng nào';
+                } else {
+                    container = document.getElementById('walletsList');
+                    message = 'Chưa có ví điện tử nào';
+                }
+                
+                if (container && container.children.length === 0) {
+                    const emptyElement = document.createElement('div');
+                    emptyElement.className = 'text-center text-muted p-3';
+                    emptyElement.innerHTML = `<i class="fas fa-info-circle me-2"></i>${message}`;
+                    container.appendChild(emptyElement);
+                }
+            } else {
+                showAlert('danger', data.message);
+            }
+        } catch (error) {
+                console.error('Error:', error);
+            showAlert('danger', 'Có lỗi xảy ra khi kết nối với máy chủ');
+        }
+    }
+    
+    // Thêm event listeners cho các nút xóa có sẵn
+    document.querySelectorAll('.delete-credit-card').forEach(button => {
+        button.addEventListener('click', handleDeleteCreditCard);
+    });
+    
+    document.querySelectorAll('.delete-bank-account').forEach(button => {
+        button.addEventListener('click', handleDeleteBankAccount);
+    });
+    
+    document.querySelectorAll('.delete-wallet').forEach(button => {
+        button.addEventListener('click', handleDeleteWallet);
+    });
+
+    // Handle hủy thêm thẻ tín dụng
+    document.getElementById('cancelCreditCard')?.addEventListener('click', function() {
+        $(creditCardForm).collapse('hide');
+    });
+    
+    // Handle hủy thêm tài khoản ngân hàng
+    document.getElementById('cancelBankAccount')?.addEventListener('click', function() {
+        $(bankAccountForm).collapse('hide');
+    });
+    
+    // Handle hủy thêm ví điện tử
+    document.getElementById('cancelWallet')?.addEventListener('click', function() {
+        $(walletForm).collapse('hide');
+    });
+});
+</script>
+{% endblock %}

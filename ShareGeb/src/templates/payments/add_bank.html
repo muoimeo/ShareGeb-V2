@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm" data-aos="fade-up">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-university me-2"></i>Thêm tài khoản ngân hàng mới
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="tab-buttons mb-4">
+                        <div class="btn-group w-100">
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='credit') }}" 
+                               class="btn btn-lg btn-outline-primary">
+                                <i class="fas fa-credit-card me-2"></i>Thẻ tín dụng/ghi nợ
+                            </a>
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='bank') }}" 
+                               class="btn btn-lg btn-primary">
+                                <i class="fas fa-university me-2"></i>Tài khoản ngân hàng
+                            </a>
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='ewallet') }}" 
+                               class="btn btn-lg btn-outline-primary">
+                                <i class="fas fa-wallet me-2"></i>Ví điện tử
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Form thêm tài khoản ngân hàng -->
+                    <form action="{{ url_for('payment.add_bank_account') }}{% if request.args.get('from_booking') %}?from_booking=1{% endif %}" method="post" id="bankAccountForm">
+                        <div class="mb-4">
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='image/bank-account.png') }}" alt="Bank Account" class="img-fluid" style="max-height: 120px;">
+                                <h5 class="mt-3">Thêm tài khoản ngân hàng</h5>
+                                <p class="text-muted">Sử dụng để thanh toán cho các chuyến đi của bạn</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngân hàng <span class="text-danger">*</span></label>
+                            <select class="form-select" name="bank_name" id="bankName" required>
+                                <option value="">-- Chọn ngân hàng --</option>
+                                <option value="BIDV">BIDV - Ngân hàng Đầu tư và Phát triển Việt Nam</option>
+                                <option value="Vietcombank">Vietcombank - Ngân hàng Ngoại thương Việt Nam</option>
+                                <option value="VietinBank">VietinBank - Ngân hàng Công thương Việt Nam</option>
+                                <option value="Agribank">Agribank - Ngân hàng Nông nghiệp và Phát triển Nông thôn</option>
+                                <option value="TPBank">TPBank - Ngân hàng Tiên Phong</option>
+                                <option value="Techcombank">Techcombank - Ngân hàng Kỹ thương Việt Nam</option>
+                                <option value="MBBank">MBBank - Ngân hàng Quân đội</option>
+                                <option value="ACB">ACB - Ngân hàng Á Châu</option>
+                                <option value="VPBank">VPBank - Ngân hàng Việt Nam Thịnh Vượng</option>
+                                <option value="HDBank">HDBank - Ngân hàng Phát triển TP.HCM</option>
+                                <option value="SacomBank">SacomBank - Ngân hàng Sài Gòn Thương Tín</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Số tài khoản <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="account_number" id="accountNumber" placeholder="Nhập số tài khoản" required>
+                            <div class="form-text">Chỉ nhập số, không nhập khoảng trắng hay ký tự đặc biệt</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên chủ tài khoản <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="account_holder" id="accountHolder" placeholder="VD: NGUYEN VAN A" required>
+                            <div class="form-text">Nhập đúng tên trên tài khoản ngân hàng (viết in hoa, không dấu)</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="alert alert-info d-flex align-items-center">
+                                <i class="fas fa-info-circle fs-4 me-3"></i>
+                                <div>
+                                    <p class="mb-0">Thông tin tài khoản ngân hàng này sẽ được dùng để thanh toán các chuyến đi.</p>
+                                    <p class="mb-0">Vui lòng đảm bảo thông tin chính xác.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Thêm tài khoản ngân hàng
+                            </button>
+                            {% if request.args.get('from_booking') %}
+                            <a href="{{ url_for('book_ride.book_ride') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại đặt xe
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('users.profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại hồ sơ
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bank-logo {
+    max-height: 40px;
+    max-width: 100px;
+    margin-right: 10px;
+}
+</style>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format account number
+        const accountNumberInput = document.getElementById('accountNumber');
+        
+        accountNumberInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            this.value = value;
+        });
+        
+        // Auto uppercase for account holder
+        const accountHolderInput = document.getElementById('accountHolder');
+        
+        accountHolderInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

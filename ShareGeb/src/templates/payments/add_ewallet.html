@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm" data-aos="fade-up">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-wallet me-2"></i>Liên kết ví điện tử
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="tab-buttons mb-4">
+                        <div class="btn-group w-100">
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='credit') }}" 
+                               class="btn btn-lg btn-outline-primary">
+                                <i class="fas fa-credit-card me-2"></i>Thẻ tín dụng/ghi nợ
+                            </a>
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='bank') }}" 
+                               class="btn btn-lg btn-outline-primary">
+                                <i class="fas fa-university me-2"></i>Tài khoản ngân hàng
+                            </a>
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='ewallet') }}" 
+                               class="btn btn-lg btn-primary">
+                                <i class="fas fa-wallet me-2"></i>Ví điện tử
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Form liên kết ví điện tử -->
+                    <form action="{{ url_for('payment.add_ewallet') }}{% if request.args.get('from_booking') %}?from_booking=1{% endif %}" method="post" id="ewalletForm">
+                        <div class="mb-4">
+                            <div class="text-center mb-3">
+                                <img src="{{ url_for('static', filename='image/e-wallet.png') }}" alt="E-Wallet" class="img-fluid" style="max-height: 120px;">
+                                <h5 class="mt-3">Liên kết ví điện tử</h5>
+                                <p class="text-muted">Sử dụng ví điện tử để thanh toán nhanh chóng và tiện lợi</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Loại ví <span class="text-danger">*</span></label>
+                            <select class="form-select" name="wallet_type" id="walletType" required>
+                                <option value="">-- Chọn loại ví --</option>
+                                <option value="MoMo">MoMo</option>
+                                <option value="ZaloPay">ZaloPay</option>
+                                <option value="VNPay">VNPay</option>
+                                <option value="ViettelPay">ViettelPay</option>
+                                <option value="ShopeePay">ShopeePay</option>
+                            </select>
+                        </div>
+
+                        <div id="walletDetails" class="d-none">
+                            <!-- Các trường chi tiết sẽ được hiển thị tùy theo loại ví -->
+                        </div>
+
+                        <div class="mb-4 mt-4">
+                            <div class="wallet-preview">
+                                <div id="walletPreview" class="text-center">
+                                    <div class="placeholder-image">
+                                        <i class="fas fa-wallet fa-5x text-secondary opacity-50"></i>
+                                        <p class="mt-3 text-muted">Chọn loại ví để xem thông tin</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="alert alert-info d-flex align-items-center">
+                                <i class="fas fa-info-circle fs-4 me-3"></i>
+                                <div>
+                                    <p class="mb-0">Khi liên kết ví điện tử, bạn sẽ được chuyển đến trang xác thực của nhà cung cấp ví.</p>
+                                    <p class="mb-0">Sau khi liên kết thành công, bạn có thể sử dụng ví để thanh toán các chuyến đi.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-link me-2"></i>Liên kết ví
+                            </button>
+                            {% if request.args.get('from_booking') %}
+                            <a href="{{ url_for('book_ride.book_ride') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại đặt xe
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('users.profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại hồ sơ
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.wallet-preview {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ewallet-card {
+    width: 100%;
+    max-width: 350px;
+    height: 180px;
+    border-radius: 15px;
+    padding: 20px;
+    position: relative;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ewallet-card.momo {
+    background: linear-gradient(135deg, #b0006d, #e3317d);
+}
+
+.ewallet-card.zalopay {
+    background: linear-gradient(135deg, #0068ff, #00bac5);
+}
+
+.ewallet-card.vnpay {
+    background: linear-gradient(135deg, #004a9f, #0076bc);
+}
+
+.ewallet-card.viettelpay {
+    background: linear-gradient(135deg, #e30000, #ff5722);
+}
+
+.ewallet-card.shopeepay {
+    background: linear-gradient(135deg, #ee4d2d, #ff7337);
+}
+
+.ewallet-logo {
+    height: 40px;
+    width: auto;
+    align-self: flex-end;
+}
+
+.ewallet-user {
+    text-align: left;
+}
+
+.ewallet-user label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.placeholder-image {
+    padding: 30px;
+}
+</style>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const walletTypeSelect = document.getElementById('walletType');
+        const walletPreview = document.getElementById('walletPreview');
+        
+        walletTypeSelect.addEventListener('change', function() {
+            const walletType = this.value;
+            
+            if (!walletType) {
+                walletPreview.innerHTML = `
+                    <div class="placeholder-image">
+                        <i class="fas fa-wallet fa-5x text-secondary opacity-50"></i>
+                        <p class="mt-3 text-muted">Chọn loại ví để xem thông tin</p>
+                    </div>`;
+                return;
+            }
+            
+            let bgClass, logo, icon;
+            
+            switch(walletType) {
+                case 'MoMo':
+                    bgClass = 'momo';
+                    logo = 'momo-logo.png';
+                    icon = 'fa-money-bill-wave';
+                    break;
+                case 'ZaloPay':
+                    bgClass = 'zalopay';
+                    logo = 'zalopay-logo.png';
+                    icon = 'fa-comments-dollar';
+                    break;
+                case 'VNPay':
+                    bgClass = 'vnpay';
+                    logo = 'vnpay-logo.png';
+                    icon = 'fa-credit-card';
+                    break;
+                case 'ViettelPay':
+                    bgClass = 'viettelpay';
+                    logo = 'viettelpay-logo.png';
+                    icon = 'fa-mobile-alt';
+                    break;
+                case 'ShopeePay':
+                    bgClass = 'shopeepay';
+                    logo = 'shopeepay-logo.png';
+                    icon = 'fa-shopping-bag';
+                    break;
+            }
+            
+            walletPreview.innerHTML = `
+                <div class="ewallet-card ${bgClass}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas ${icon} fa-2x"></i>
+                        </div>
+                        <div>
+                            <strong>${walletType}</strong>
+                        </div>
+                    </div>
+                    <div class="ewallet-user">
+                        <label>TÀI KHOẢN</label>
+                        <div>${current_user.full_name}</div>
+                        <div class="small">${current_user.phone}</div>
+                    </div>
+                    <div class="text-end">
+                        <small>Thanh toán nhanh chóng và an toàn</small>
+                    </div>
+                </div>`;
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

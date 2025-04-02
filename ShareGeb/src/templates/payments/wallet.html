@@ -1,0 +1,552 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <!-- Số dư ví -->
+            <div class="card balance-card shadow-sm mb-4" data-aos="fade-up">
+                <div class="card-body">
+                    <div class="balance-header">
+                        <h5 class="balance-title">Số dư ví</h5>
+                        <div class="balance-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                    <h2 class="balance-amount">
+                        {{ "{:,.0f}".format(user.wallet_balance) }}đ
+                    </h2>
+                    <div class="balance-buttons mt-3">
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#topupModal">
+                            <i class="fas fa-plus-circle me-1"></i>Nạp tiền
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                            <i class="fas fa-minus-circle me-1"></i>Rút tiền
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin ví -->
+            <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Thông tin ví</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Loại tiền tệ:</span>
+                            <span class="badge bg-primary">VND</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Trạng thái:</span>
+                            <span class="badge bg-success">Đang hoạt động</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Ngày tạo:</span>
+                            <span>{{ wallet.created_at.strftime('%d/%m/%Y') if wallet else 'N/A' }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Giao dịch gần nhất:</span>
+                            <span>{{ wallet.last_transaction_at.strftime('%d/%m/%Y') if wallet and wallet.last_transaction_at else 'Chưa có' }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Lịch sử giao dịch -->
+            <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Lịch sử giao dịch</h5>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-primary active transaction-filter" data-filter="all">Tất cả</button>
+                            <button type="button" class="btn btn-outline-primary transaction-filter" data-filter="deposit">Nạp tiền</button>
+                            <button type="button" class="btn btn-outline-primary transaction-filter" data-filter="payment">Thanh toán</button>
+                            <button type="button" class="btn btn-outline-primary transaction-filter" data-filter="refund">Hoàn tiền</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if transactions %}
+                    <div class="transaction-list">
+                        {% for transaction in transactions %}
+                        <div class="transaction-item {{ transaction.type }}" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+                            <div class="transaction-icon 
+                                {% if transaction.type == 'deposit' %}bg-success{% 
+                                elif transaction.type == 'withdrawal' %}bg-warning{% 
+                                elif transaction.type == 'payment' %}bg-danger{% 
+                                elif transaction.type == 'refund' %}bg-info{% 
+                                else %}bg-secondary{% endif %}">
+                                {% if transaction.type == 'deposit' %}<i class="fas fa-arrow-down"></i>{% 
+                                elif transaction.type == 'withdrawal' %}<i class="fas fa-arrow-up"></i>{% 
+                                elif transaction.type == 'payment' %}<i class="fas fa-shopping-cart"></i>{% 
+                                elif transaction.type == 'refund' %}<i class="fas fa-undo"></i>{% 
+                                else %}<i class="fas fa-exchange-alt"></i>{% endif %}
+                            </div>
+                            <div class="transaction-details">
+                                <h6 class="transaction-title">
+                                    {% if transaction.type == 'deposit' %}Nạp tiền{% 
+                                    elif transaction.type == 'withdrawal' %}Rút tiền{% 
+                                    elif transaction.type == 'payment' %}Thanh toán chuyến đi #{{ transaction.payment.ride_passenger.ride_id }}{% 
+                                    elif transaction.type == 'refund' %}Hoàn tiền{% 
+                                    else %}Giao dịch{% endif %}
+                                </h6>
+                                <p class="transaction-date">{{ transaction.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                                <div class="transaction-status 
+                                    {% if transaction.status == 'completed' %}text-success{% 
+                                    elif transaction.status == 'pending' %}text-warning{% 
+                                    elif transaction.status == 'failed' %}text-danger{% 
+                                    else %}text-secondary{% endif %}">
+                                    {% if transaction.status == 'completed' %}Hoàn thành{% 
+                                    elif transaction.status == 'pending' %}Đang xử lý{% 
+                                    elif transaction.status == 'failed' %}Thất bại{% 
+                                    else %}Hủy{% endif %}
+                                </div>
+                            </div>
+                            <div class="transaction-amount {% if transaction.type == 'deposit' or transaction.type == 'refund' %}text-success{% else %}text-danger{% endif %}">
+                                {% if transaction.type == 'deposit' or transaction.type == 'refund' %}+{% else %}-{% endif %}{{ "{:,.0f}".format(transaction.amount) }}đ
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <img src="{{ url_for('static', filename='image/no-transactions.png') }}" alt="Không có giao dịch" class="img-fluid mb-3" style="max-height: 150px;">
+                        <p class="text-muted">Bạn chưa có giao dịch nào</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nạp tiền -->
+<div class="modal fade" id="topupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nạp tiền vào ví</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="topupForm">
+                    <div class="mb-3">
+                        <label class="form-label">Số tiền</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="topupAmount" min="10000" step="10000" value="100000">
+                            <span class="input-group-text">VND</span>
+                        </div>
+                        <div class="form-text">Số tiền tối thiểu: 10,000đ</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phương thức nạp tiền</label>
+                        <select class="form-select" id="topupMethod">
+                            <option value="credit_card">Thẻ tín dụng</option>
+                            <option value="bank_transfer">Chuyển khoản ngân hàng</option>
+                            <option value="momo">Ví MoMo</option>
+                        </select>
+                    </div>
+                    <div id="creditCardSection">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn thẻ</label>
+                            <select class="form-select" id="creditCardSelect">
+                                {% if credit_cards %}
+                                    {% for card in credit_cards %}
+                                    <option value="{{ card.card_id }}">{{ card.card_type }} (**** {{ card.last_4_digits }})</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="">Không có thẻ nào</option>
+                                {% endif %}
+                            </select>
+                            <div class="mt-2">
+                                <a href="{{ url_for('payment.add_payment_method', type='credit') }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-plus me-1"></i>Thêm thẻ mới
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary" id="confirmTopup">
+                    <i class="fas fa-check me-1"></i>Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Rút tiền -->
+<div class="modal fade" id="withdrawModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rút tiền từ ví</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="withdrawForm">
+                    <div class="mb-3">
+                        <label class="form-label">Số tiền</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="withdrawAmount" min="10000" step="10000" max="{{ user.wallet_balance }}" value="100000">
+                            <span class="input-group-text">VND</span>
+                        </div>
+                        <div class="form-text">Số dư hiện tại: {{ "{:,.0f}".format(user.wallet_balance) }}đ</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phương thức rút tiền</label>
+                        <select class="form-select" id="withdrawMethod">
+                            <option value="bank_transfer">Chuyển khoản ngân hàng</option>
+                        </select>
+                    </div>
+                    <div id="bankAccountSection">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn tài khoản ngân hàng</label>
+                            <select class="form-select" id="bankAccountSelect">
+                                {% if bank_accounts %}
+                                    {% for account in bank_accounts %}
+                                    <option value="{{ account.account_id }}">{{ account.bank_name }} (**** {{ account.last_4_digits }})</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="">Không có tài khoản nào</option>
+                                {% endif %}
+                            </select>
+                            <div class="mt-2">
+                                <a href="{{ url_for('payment.add_payment_method', type='bank') }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-plus me-1"></i>Thêm tài khoản mới
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary" id="confirmWithdraw">
+                    <i class="fas fa-check me-1"></i>Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.balance-card {
+    background: linear-gradient(135deg, #4286f4, #373B44);
+    color: white;
+    overflow: hidden;
+    position: relative;
+    border-radius: 10px;
+    border: none;
+}
+
+.balance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.balance-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.balance-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.balance-icon i {
+    font-size: 1.3rem;
+}
+
+.balance-amount {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.balance-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.balance-buttons .btn {
+    flex: 1;
+    border-radius: 20px;
+}
+
+.transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.transaction-item {
+    display: flex;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+.transaction-item:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.transaction-item.deposit {
+    border-left-color: #28a745;
+}
+
+.transaction-item.withdrawal {
+    border-left-color: #ffc107;
+}
+
+.transaction-item.payment {
+    border-left-color: #dc3545;
+}
+
+.transaction-item.refund {
+    border-left-color: #17a2b8;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+}
+
+.transaction-details {
+    flex: 1;
+}
+
+.transaction-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.transaction-date {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.transaction-status {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.transaction-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.transaction-filter.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý lọc giao dịch
+    document.querySelectorAll('.transaction-filter').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('.transaction-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            const items = document.querySelectorAll('.transaction-item');
+            
+            if (filter === 'all') {
+                items.forEach(item => {
+                    item.style.display = 'flex';
+                });
+            } else {
+                items.forEach(item => {
+                    if (item.classList.contains(filter)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    });
+    
+    // Nạp tiền
+    document.getElementById('confirmTopup').addEventListener('click', function() {
+        const amount = document.getElementById('topupAmount').value;
+        const method = document.getElementById('topupMethod').value;
+        
+        if (amount < 10000) {
+            alert('Số tiền nạp tối thiểu là 10,000đ');
+            return;
+        }
+        
+        if (method === 'credit_card') {
+            const cardId = document.getElementById('creditCardSelect').value;
+            if (!cardId) {
+                alert('Vui lòng chọn thẻ hoặc thêm thẻ mới');
+                return;
+            }
+        }
+        
+        // Hiển thị loading
+        this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+        this.disabled = true;
+        
+        // Gửi request nạp tiền
+        fetch('{{ url_for("payment.topup_wallet") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: amount,
+                method: method,
+                card_id: method === 'credit_card' ? document.getElementById('creditCardSelect').value : null
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset button
+            this.innerHTML = '<i class="fas fa-check me-1"></i>Xác nhận';
+            this.disabled = false;
+            
+            if (data.success) {
+                // Đóng modal
+                bootstrap.Modal.getInstance(document.getElementById('topupModal')).hide();
+                
+                // Hiển thị thông báo thành công
+                alert('Nạp tiền thành công!');
+                
+                // Reload trang để cập nhật số dư
+                location.reload();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra khi nạp tiền');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.innerHTML = '<i class="fas fa-check me-1"></i>Xác nhận';
+            this.disabled = false;
+            alert('Có lỗi xảy ra khi nạp tiền');
+        });
+    });
+    
+    // Rút tiền
+    document.getElementById('confirmWithdraw').addEventListener('click', function() {
+        const amount = document.getElementById('withdrawAmount').value;
+        const method = document.getElementById('withdrawMethod').value;
+        
+        if (amount < 10000) {
+            alert('Số tiền rút tối thiểu là 10,000đ');
+            return;
+        }
+        
+        if (amount > {{ user.wallet_balance }}) {
+            alert('Số tiền rút không được vượt quá số dư hiện tại');
+            return;
+        }
+        
+        if (method === 'bank_transfer') {
+            const accountId = document.getElementById('bankAccountSelect').value;
+            if (!accountId) {
+                alert('Vui lòng chọn tài khoản ngân hàng hoặc thêm tài khoản mới');
+                return;
+            }
+        }
+        
+        // Hiển thị loading
+        this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+        this.disabled = true;
+        
+        // Gửi request rút tiền
+        fetch('{{ url_for("payment.withdraw_wallet") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: amount,
+                method: method,
+                account_id: document.getElementById('bankAccountSelect').value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset button
+            this.innerHTML = '<i class="fas fa-check me-1"></i>Xác nhận';
+            this.disabled = false;
+            
+            if (data.success) {
+                // Đóng modal
+                bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+                
+                // Hiển thị thông báo thành công
+                alert('Rút tiền thành công!');
+                
+                // Reload trang để cập nhật số dư
+                location.reload();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra khi rút tiền');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.innerHTML = '<i class="fas fa-check me-1"></i>Xác nhận';
+            this.disabled = false;
+            alert('Có lỗi xảy ra khi rút tiền');
+        });
+    });
+    
+    // Hiện/ẩn phần thẻ/ngân hàng dựa trên phương thức nạp/rút
+    document.getElementById('topupMethod').addEventListener('change', function() {
+        const method = this.value;
+        const creditCardSection = document.getElementById('creditCardSection');
+        
+        if (method === 'credit_card') {
+            creditCardSection.style.display = 'block';
+        } else {
+            creditCardSection.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %} 

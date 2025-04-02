@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header text-white text-center" style="background-color: #FD5602;">
+                    <h4>ĐĂNG KÝ</h4>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">Tên đầy đủ</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user text-primary"></i></span>
+                                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ full_name or '' }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope text-primary"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ email or '' }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Số điện thoại</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone text-primary"></i></span>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ phone or '' }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock text-primary"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <small class="form-text text-muted">Mật khẩu phải có ít nhất 6 ký tự</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">Đăng ký</button>
+                    </form>
+                    
+                    <div class="mt-4 text-center">
+                        <p>Đã có tài khoản? <a href="{{ url_for('users.login') }}" class="text-decoration-none text-primary fw-bold">Đăng nhập tại đây!</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

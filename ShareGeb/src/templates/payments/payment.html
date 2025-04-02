@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Phương thức thanh toán</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Thẻ tín dụng -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-credit-card me-2"></i>Thẻ tín dụng
+                                </h6>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#credit-card-form">
+                                    <i class="fas fa-plus"></i> Thêm thẻ
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="collapse" id="credit-card-form">
+                                <form id="credit-card-form">
+                                    <div class="mb-3">
+                                        <label class="form-label">Số thẻ</label>
+                                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Ngày hết hạn</label>
+                                            <input type="text" class="form-control" placeholder="MM/YY">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">CVV</label>
+                                            <input type="text" class="form-control" placeholder="123">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tên chủ thẻ</label>
+                                        <input type="text" class="form-control" placeholder="NGUYEN VAN A">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Lưu thẻ</button>
+                                </form>
+                            </div>
+                            <!-- Danh sách thẻ đã lưu -->
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-credit-card me-2"></i>
+                                            **** **** **** 1234
+                                            <small class="text-muted ms-2">Hết hạn: 12/25</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ví MoMo -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-wallet me-2"></i>Ví MoMo
+                                </h6>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#momo-form">
+                                    <i class="fas fa-plus"></i> Liên kết ví
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="collapse" id="momo-form">
+                                <form id="momo-form">
+                                    <div class="mb-3">
+                                        <label class="form-label">Số điện thoại MoMo</label>
+                                        <input type="tel" class="form-control" placeholder="0123456789">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Liên kết ví</button>
+                                </form>
+                            </div>
+                            <!-- Danh sách ví đã liên kết -->
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-wallet me-2"></i>
+                                            **** 1234
+                                            <small class="text-muted ms-2">Đã xác thực</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thanh toán tiền mặt -->
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-money-bill-wave me-2"></i>Thanh toán tiền mặt
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-0">
+                                Thanh toán tiền mặt khi đến nơi. Vui lòng chuẩn bị đủ số tiền để thanh toán.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.btn-outline-danger {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý form thẻ tín dụng
+    document.getElementById('credit-card-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Thẻ đã được lưu thành công!');
+        this.reset();
+        bootstrap.Collapse.getInstance(document.getElementById('credit-card-form')).hide();
+    });
+
+    // Xử lý form MoMo
+    document.getElementById('momo-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Ví MoMo đã được liên kết thành công!');
+        this.reset();
+        bootstrap.Collapse.getInstance(document.getElementById('momo-form')).hide();
+    });
+
+    // Xử lý nút xóa
+    document.querySelectorAll('.btn-outline-danger').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (confirm('Bạn có chắc chắn muốn xóa phương thức thanh toán này?')) {
+                this.closest('.list-group-item').remove();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
