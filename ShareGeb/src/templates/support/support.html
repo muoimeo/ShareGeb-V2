@@ -343,55 +343,55 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const chatForm = document.getElementById('chatForm');
-    const chatMessage = document.getElementById('chatMessage');
-    const chatContainer = document.getElementById('chatContainer');
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chatForm');
+        const chatMessage = document.getElementById('chatMessage');
+        const chatContainer = document.getElementById('chatContainer');
+        
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const message = chatMessage.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage('user', message);
+            chatMessage.value = '';
     
-    chatForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+            // Call backend API
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+    
+                const data = await response.json();
+                addMessage('assistant', data.response);
+            } catch (error) {
+                addMessage('assistant', 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.');
+            }
+        });
         
-        const message = chatMessage.value.trim();
-        if (!message) return;
-        
-        // Add user message
-        addMessage('user', message);
-        chatMessage.value = '';
-        
-        // Simulate assistant response
-        setTimeout(() => {
-            addMessage('assistant', 'Cảm ơn bạn đã liên hệ. Hiện tại hệ thống chatbot đang được phát triển. Chúng tôi sẽ liên hệ với bạn qua email hoặc số điện thoại.');
-        }, 1000);
+        function addMessage(sender, text) {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            
+            messageDiv.innerHTML = `
+                <div class="chat-bubble">
+                    <p>${text}</p>
+                </div>
+                <small class="text-muted">${sender === 'user' ? 'Bạn' : 'Trợ lý ShareGeb'}, ${time}</small>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
     });
     
-    function addMessage(sender, text) {
-        const now = new Date();
-        const time = now.getHours().toString().padStart(2, '0') + ':' + 
-                    now.getMinutes().toString().padStart(2, '0');
-        
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message ${sender}`;
-        
-        messageDiv.innerHTML = `
-            <div class="chat-bubble">
-                <p>${text}</p>
-            </div>
-            <small class="text-muted">${sender === 'user' ? 'Bạn' : 'Trợ lý ShareGeb'}, ${time}</small>
-        `;
-        
-        chatContainer.appendChild(messageDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-    
-    // Handle support form submission
-    const supportForm = document.getElementById('supportForm');
-    if (supportForm) {
-        supportForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Cảm ơn bạn! Yêu cầu hỗ trợ của bạn đã được gửi. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.');
-            supportForm.reset();
-        });
-    }
-});
 </script>
 {% endblock %} 

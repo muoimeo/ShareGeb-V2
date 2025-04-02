@@ -10,6 +10,7 @@ from src.routes.profile import profile_bp
 from src.routes.discount import discount_bp
 from src.routes.partners import partners_bp
 from src.routes.support import support_bp
+from src.routes.chatbot import chatbot_bp
 import os
 from datetime import datetime, timedelta
 
@@ -54,6 +55,7 @@ app.register_blueprint(profile_bp)
 app.register_blueprint(discount_bp)
 app.register_blueprint(partners_bp)
 app.register_blueprint(support_bp)
+app.register_blueprint(chatbot_bp)
 
 # Create database tables
 with app.app_context():

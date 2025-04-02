@@ -8,6 +8,7 @@ from src.routes.errors import errors_bp
 from src.routes.payment import payment_bp
 from src.routes.partners import partners_bp
 from src.routes.support import support_bp
+from src.routes.chatbot import chatbot_bp
 
 # Export all blueprints
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     'payment_bp',
     'users_bp',
     'partners_bp',
-    'support_bp'
+    'support_bp',
+    'chatbot_bp'
 ]
