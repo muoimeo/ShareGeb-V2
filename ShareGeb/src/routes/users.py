@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, current_app, session
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, current_app, session, flash, make_response
 from werkzeug.utils import secure_filename
 from flask_login import login_user, logout_user, login_required, current_user
 from src.models import db, User, BankAccount, Wallet
@@ -7,6 +7,7 @@ import secrets
 import datetime
 import time
 import re
+from werkzeug.security import generate_password_hash, check_password_hash
 
 users_bp = Blueprint('users', __name__)
 
@@ -174,12 +175,42 @@ def reset_password(token):
     return render_template('users/reset_password.html', token=token)
 
 @users_bp.route('/logout')
+@login_required
 def logout():
-    # Đăng xuất user khỏi Flask-Login
+    """Đăng xuất người dùng"""
+    # Lưu trạng thái đăng nhập trước khi đăng xuất
+    was_authenticated = current_user.is_authenticated
+    
+    # Đăng xuất người dùng bằng Flask-Login
     logout_user()
-    # Xóa session
+    
+    # Xóa tất cả thông tin phiên làm việc
     session.clear()
-    return redirect(url_for('users.login'))
+    
+    # Tạo response để chuyển hướng về trang đăng nhập
+    response = make_response(redirect(url_for('users.login')))
+    
+    if was_authenticated:
+        # Thêm cookie để đánh dấu trạng thái đăng xuất
+        response.set_cookie('logged_out', 'true', max_age=30, path='/')
+        
+        # Xóa các cookie khác nếu cần
+        for cookie_name in request.cookies:
+            if cookie_name != 'session':
+                response.delete_cookie(cookie_name, path='/')
+    
+    # Đảm bảo không lưu cache
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    
+    # Thêm header tùy chỉnh để đánh dấu đã đăng xuất, hữu ích cho frontend
+    response.headers['X-Logged-Out'] = 'true'
+    
+    # Hiển thị thông báo thành công
+    flash('Bạn đã đăng xuất thành công!', 'success')
+    
+    return response
 
 @users_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -438,3 +469,16 @@ def get_wallets():
         return jsonify({'success': True, 'wallets': wallets_data})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e), 'wallets': []})
+
+@users_bp.route('/check_login_status')
+def check_login_status():
+    """Kiểm tra trạng thái đăng nhập của người dùng"""
+    # Đảm bảo không lưu cache
+    response = jsonify({
+        'is_authenticated': current_user.is_authenticated,
+        'timestamp': datetime.now().timestamp()
+    })
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response

@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -92,4 +98,34 @@
     box-shadow: 0 0 0 0.2rem rgba(253, 86, 2, 0.25);
 }
 </style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Đảm bảo xóa tất cả dữ liệu đăng nhập cũ
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Login page loaded - clearing auth data");
+        
+        // Xóa dữ liệu phiên nhưng không gây reload
+        if (document.cookie.includes('logged_out=true')) {
+            console.log("Logging out completed");
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Xóa cookies không cần thiết
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i];
+                const eqPos = cookie.indexOf("=");
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                if (name.trim() !== "session") { // Giữ lại cookie session
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                }
+            }
+            
+            // Ngăn chặn vòng lặp reload
+            document.cookie = "logged_out=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        }
+    });
+</script>
 {% endblock %}

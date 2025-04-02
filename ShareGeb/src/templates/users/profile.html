@@ -423,6 +423,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to show alerts
     function showAlert(type, message) {
+        // Xóa alert cũ nếu có
+        const existingAlerts = document.querySelectorAll('.alert');
+        existingAlerts.forEach(alert => alert.remove());
+        
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
         alertDiv.innerHTML = `
@@ -433,10 +437,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Insert alert before the form
         profileForm.parentNode.insertBefore(alertDiv, profileForm);
         
-        // Auto dismiss after 3 seconds
+        // Auto dismiss after 5 seconds
         setTimeout(() => {
-            alertDiv.remove();
-        }, 3000);
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
     }
 
     // Toggle payment methods section
@@ -474,6 +480,26 @@ document.addEventListener('DOMContentLoaded', function() {
         $(walletForm).collapse('toggle');
     });
 
+    // Hàm lấy CSRF token từ meta tag hoặc cookie
+    function getCSRFToken() {
+        // Kiểm tra xem có meta tag chứa csrf token không
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('content');
+        
+        // Thử lấy từ cookie
+        const match = document.cookie.match(/csrf_token=([^;]+)/);
+        return match ? match[1] : '';
+    }
+
+    // Hàm xóa các thông báo lỗi trong form
+    function removeErrorMessages(formId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            const errorMessages = form.querySelectorAll('.alert-danger');
+            errorMessages.forEach(msg => msg.remove());
+        }
+    }
+    
     // Xử lý thêm thẻ tín dụng
     const saveCreditCardBtn = document.getElementById('saveCreditCard');
     
@@ -485,6 +511,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const cardHolder = document.getElementById('newCardHolder').value;
         const cvv = document.getElementById('newCvv').value;
         
+        // Xóa thông báo lỗi cũ
+        removeErrorMessages('creditCardForm');
+        
         // Hiển thị lỗi ngay trên form
         const errorDiv = document.createElement('div');
         errorDiv.className = 'alert alert-danger mb-3';
@@ -493,6 +522,9 @@ document.addEventListener('DOMContentLoaded', function() {
             errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin thẻ';
             const form = document.getElementById('creditCardForm');
             form.insertBefore(errorDiv, form.firstChild);
+            
+            // Tự động xóa thông báo lỗi sau 5 giây
+            setTimeout(() => errorDiv.remove(), 5000);
             return;
         }
         
@@ -506,13 +538,20 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const response = await fetch('/payment/add_credit_card', {
-        method: 'POST',
-        body: formData
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
+            
+            if (!response.ok) {
+                throw new Error(`Lỗi HTTP: ${response.status}`);
+            }
             
             const data = await response.json();
             
-        if (data.success) {
+            if (data.success) {
                 showAlert('success', 'Thêm thẻ thành công');
                 
                 // Tạo phần tử hiển thị thẻ mới
@@ -551,20 +590,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Thêm event listener cho nút xóa
                 cardElement.querySelector('.delete-credit-card').addEventListener('click', handleDeleteCreditCard);
-        } else {
+            } else {
                 errorDiv.textContent = data.message || 'Có lỗi xảy ra khi thêm thẻ';
                 const form = document.getElementById('creditCardForm');
                 form.insertBefore(errorDiv, form.firstChild);
+                
+                // Tự động xóa thông báo lỗi sau 5 giây
+                setTimeout(() => errorDiv.remove(), 5000);
             }
         } catch (error) {
             console.error('Error:', error);
-            errorDiv.textContent = 'Có lỗi xảy ra khi kết nối với máy chủ';
+            errorDiv.textContent = 'Có lỗi xảy ra khi kết nối với máy chủ: ' + error.message;
             const form = document.getElementById('creditCardForm');
             form.insertBefore(errorDiv, form.firstChild);
+            
+            // Tự động xóa thông báo lỗi sau 5 giây
+            setTimeout(() => errorDiv.remove(), 5000);
         }
-});
+    });
 
-// Xử lý thêm tài khoản ngân hàng
+    // Xử lý thêm tài khoản ngân hàng
     const saveBankAccountBtn = document.getElementById('saveBankAccount');
     
     saveBankAccountBtn?.addEventListener('click', async function() {
@@ -572,11 +617,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const accountNumber = document.getElementById('newAccountNumber').value;
         const accountHolder = document.getElementById('newAccountHolder').value;
         
+        // Xóa các thông báo lỗi cũ nếu có
+        removeErrorMessages('bankAccountForm');
+        
+        // Hiển thị lỗi ngay trên form giống với cách hiển thị của các mục khác
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mb-3';
+        
         if (!bankName || !accountNumber || !accountHolder) {
-            showAlert('warning', 'Vui lòng điền đầy đủ thông tin tài khoản');
-        return;
-    }
-    
+            errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin tài khoản';
+            const form = document.getElementById('bankAccountForm');
+            form.insertBefore(errorDiv, form.firstChild);
+            
+            // Tự động xóa thông báo lỗi sau 5 giây
+            setTimeout(() => errorDiv.remove(), 5000);
+            return;
+        }
+        
         const formData = new FormData();
         formData.append('bank_name', bankName);
         formData.append('account_number', accountNumber);
@@ -585,8 +642,15 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/payment/add_bank_account', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
+            
+            if (!response.ok) {
+                throw new Error(`Lỗi HTTP: ${response.status}`);
+            }
             
             const data = await response.json();
             
@@ -627,11 +691,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Thêm event listener cho nút xóa
                 accountElement.querySelector('.delete-bank-account').addEventListener('click', handleDeleteBankAccount);
             } else {
-                showAlert('danger', data.message || 'Có lỗi xảy ra khi thêm tài khoản');
+                errorDiv.textContent = data.message || 'Có lỗi xảy ra khi thêm tài khoản';
+                const form = document.getElementById('bankAccountForm');
+                form.insertBefore(errorDiv, form.firstChild);
+                
+                // Tự động xóa thông báo lỗi sau 5 giây
+                setTimeout(() => errorDiv.remove(), 5000);
             }
         } catch (error) {
             console.error('Error:', error);
-            showAlert('danger', 'Có lỗi xảy ra khi kết nối với máy chủ');
+            errorDiv.textContent = 'Có lỗi xảy ra khi kết nối với máy chủ: ' + error.message;
+            const form = document.getElementById('bankAccountForm');
+            form.insertBefore(errorDiv, form.firstChild);
+            
+            // Tự động xóa thông báo lỗi sau 5 giây
+            setTimeout(() => errorDiv.remove(), 5000);
         }
     });
     
@@ -641,6 +715,9 @@ document.addEventListener('DOMContentLoaded', function() {
     saveWalletBtn?.addEventListener('click', async function() {
         const walletType = document.getElementById('newWalletType').value;
         
+        // Xóa thông báo lỗi cũ
+        removeErrorMessages('walletForm');
+        
         // Hiển thị lỗi ngay trên form
         const errorDiv = document.createElement('div');
         errorDiv.className = 'alert alert-danger mb-3';
@@ -649,21 +726,31 @@ document.addEventListener('DOMContentLoaded', function() {
             errorDiv.textContent = 'Vui lòng chọn loại ví';
             const form = document.getElementById('walletForm');
             form.insertBefore(errorDiv, form.firstChild);
-        return;
-    }
-    
+            
+            // Tự động xóa thông báo lỗi sau 5 giây
+            setTimeout(() => errorDiv.remove(), 5000);
+            return;
+        }
+        
         const formData = new FormData();
         formData.append('wallet_type', walletType);
         
         try {
             const response = await fetch('/payment/add_ewallet', {
-        method: 'POST',
-                body: formData
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
+            
+            if (!response.ok) {
+                throw new Error(`Lỗi HTTP: ${response.status}`);
+            }
             
             const data = await response.json();
             
-        if (data.success) {
+            if (data.success) {
                 showAlert('success', 'Thêm ví thành công');
                 
                 // Tạo phần tử hiển thị ví mới
@@ -697,16 +784,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Thêm event listener cho nút xóa
                 walletElement.querySelector('.delete-wallet').addEventListener('click', handleDeleteWallet);
-        } else {
+            } else {
                 errorDiv.textContent = data.message || 'Có lỗi xảy ra khi thêm ví';
                 const form = document.getElementById('walletForm');
                 form.insertBefore(errorDiv, form.firstChild);
+                
+                // Tự động xóa thông báo lỗi sau 5 giây
+                setTimeout(() => errorDiv.remove(), 5000);
             }
         } catch (error) {
             console.error('Error:', error);
-            errorDiv.textContent = 'Có lỗi xảy ra khi kết nối với máy chủ';
+            errorDiv.textContent = 'Có lỗi xảy ra khi kết nối với máy chủ: ' + error.message;
             const form = document.getElementById('walletForm');
             form.insertBefore(errorDiv, form.firstChild);
+            
+            // Tự động xóa thông báo lỗi sau 5 giây
+            setTimeout(() => errorDiv.remove(), 5000);
         }
     });
 
@@ -741,6 +834,8 @@ document.addEventListener('DOMContentLoaded', function() {
     async function deletePaymentMethod(type, id, element) {
         let url;
         
+        console.log(`Attempting to delete ${type} with ID ${id}`);
+        
         switch (type) {
             case 'credit_card':
                 url = `/payment/delete_credit_card/${id}`;
@@ -752,20 +847,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 url = `/payment/delete_wallet/${id}`;
                 break;
             default:
+                console.error(`Invalid payment method type: ${type}`);
                 return;
         }
+        
+        console.log(`DELETE request to URL: ${url}`);
         
         try {
             const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
             });
             
-            const data = await response.json();
+            console.log(`Response status: ${response.status}`);
             
-                if (data.success) {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Response data:', data);
+            
+            if (data.success) {
                 showAlert('success', data.message);
                 
                 // Xóa phần tử ra khỏi DOM
@@ -793,11 +900,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     container.appendChild(emptyElement);
                 }
             } else {
-                showAlert('danger', data.message);
+                console.error('Delete failed:', data.message);
+                showAlert('danger', data.message || 'Xóa không thành công');
             }
         } catch (error) {
-                console.error('Error:', error);
-            showAlert('danger', 'Có lỗi xảy ra khi kết nối với máy chủ');
+            console.error('Error deleting payment method:', error);
+            showAlert('danger', `Có lỗi xảy ra: ${error.message}`);
         }
     }
     

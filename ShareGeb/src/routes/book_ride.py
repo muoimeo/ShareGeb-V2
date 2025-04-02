@@ -57,3 +57,36 @@ def book_ride():
                           max_discount=max_discount,
                           discount_applied=discount_applied,
                           available_discounts=available_discounts)
+
+@book_ride_bp.route('/select-ride-type', methods=['GET'])
+@login_required
+def select_ride_type():
+    return render_template('book_ride/ride_type_popup.html')
+
+@book_ride_bp.route('/book-ride-shared', methods=['GET', 'POST'])
+@login_required
+def book_ride_shared():
+    # Lấy thông tin phương thức thanh toán của user
+    credit_cards = CreditCard.query.filter_by(user_id=current_user.user_id).all()
+    wallets = Wallet.query.filter_by(user_id=current_user.user_id).all()
+    bank_accounts = BankAccount.query.filter_by(user_id=current_user.user_id).all()
+    
+    return render_template('book_ride/book_ride_shared.html', 
+                          user=current_user,
+                          credit_cards=credit_cards,
+                          wallets=wallets,
+                          bank_accounts=bank_accounts)
+
+@book_ride_bp.route('/book-ride-closed', methods=['GET', 'POST'])
+@login_required
+def book_ride_closed():
+    # Lấy thông tin phương thức thanh toán của user
+    credit_cards = CreditCard.query.filter_by(user_id=current_user.user_id).all()
+    wallets = Wallet.query.filter_by(user_id=current_user.user_id).all()
+    bank_accounts = BankAccount.query.filter_by(user_id=current_user.user_id).all()
+    
+    return render_template('book_ride/book_ride_closed.html', 
+                          user=current_user,
+                          credit_cards=credit_cards,
+                          wallets=wallets,
+                          bank_accounts=bank_accounts)
