@@ -67,21 +67,8 @@
             transition: all 0.3s ease;
         }
 
-        .navbar-nav .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            background: white;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: width 0.3s ease;
-        }
-
-        .navbar-nav .nav-link:hover::after,
-        .navbar-nav .nav-link.active::after {
-            width: 80%;
+        .navbar-nav .nav-link:hover {
+            opacity: 0.9;
         }
 
         .navbar-dark .navbar-toggler {
@@ -356,6 +343,10 @@
     <!-- Main Content -->
     <main class="flex-grow-1">
         {% block content %}{% endblock %}
+
+        {% if request.path not in ['/login', '/register', '/support'] %}
+            {% include 'partials/_chat_widget.html' %}
+        {% endif %}
     </main>
 
     <!-- Footer -->

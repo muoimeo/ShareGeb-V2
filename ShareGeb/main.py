@@ -40,20 +40,20 @@ app = Flask(__name__,
     static_folder='static'
 )
 
-# Configuration
-app.config['SECRET_KEY'] = 'your-secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:MinhDZ3009@localhost/sharegeb?charset=utf8mb4'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_recycle': 3600,
-    'pool_timeout': 900,
-    'pool_size': 10,
-    'max_overflow': 5
-}
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+# # Configuration
+# app.config['SECRET_KEY'] = 'your-secret-key'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:MinhDZ3009@localhost/sharegeb?charset=utf8mb4'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+#     'pool_recycle': 3600,
+#     'pool_timeout': 900,
+#     'pool_size': 10,
+#     'max_overflow': 5
+# }
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
-# Initialize database
-db.init_app(app)
+# # Initialize database
+# db.init_app(app)
 
 # Initialize login manager
 login_manager = LoginManager()
@@ -77,9 +77,9 @@ app.register_blueprint(partners_bp)
 app.register_blueprint(support_bp)
 app.register_blueprint(chatbot_bp)
 
-# Create database tables
-with app.app_context():
-    db.create_all()
+# # Create database tables
+# with app.app_context():
+#     db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True)

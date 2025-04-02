@@ -1,0 +1,177 @@
+<!-- Chat Widget Button -->
+<div id="chatWidgetBtn" class="chat-widget-btn">
+    <button class="btn btn-primary rounded-circle shadow-sm" onclick="toggleChatWidget()">
+        <i class="fas fa-comments"></i>
+    </button>
+</div>
+
+<!-- Chat Widget Panel -->
+<div id="chatWidgetPanel" class="chat-widget-panel">
+    <div class="chat-widget-header bg-primary text-white p-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+                <i class="fas fa-comments me-2"></i>Hỗ trợ trực tuyến
+            </h6>
+            <button type="button" class="btn-close btn-close-white" onclick="toggleChatWidget()"></button>
+        </div>
+    </div>
+    <div class="chat-widget-body">
+        <div class="chat-container" id="widgetChatContainer">
+            <div class="chat-message assistant">
+                <div class="chat-bubble">
+                    <p>Hello Meow! Kachat luôn sẵn sàng phục vụ. Tôi có thể giúp gì cho bạn?</p>
+                </div>
+                <small class="text-muted">Kachat😼</small>
+            </div>
+        </div>
+        <div class="chat-input mt-3">
+            <form id="widgetChatForm" class="d-flex">
+                <input type="text" id="widgetChatMessage" class="form-control me-2" placeholder="Nhập tin nhắn..." required>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-widget-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.chat-widget-btn .btn {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-widget-btn .btn i {
+    font-size: 24px;
+}
+
+.chat-widget-panel {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.chat-widget-panel.active {
+    display: block;
+}
+
+.chat-widget-body {
+    padding: 15px;
+}
+
+.chat-widget-body .chat-container {
+    height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message.user {
+    align-items: flex-end;
+}
+
+.chat-message.assistant {
+    align-items: flex-start;
+}
+
+.chat-bubble {
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 15px;
+}
+
+.chat-message.user .chat-bubble {
+    background-color: var(--primary-color);
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.chat-message.assistant .chat-bubble {
+    background-color: #f0f2f5;
+    border-bottom-left-radius: 5px;
+}
+
+.chat-bubble p {
+    margin-bottom: 0;
+}
+</style>
+
+<script>
+function toggleChatWidget() {
+    const panel = document.getElementById('chatWidgetPanel');
+    panel.classList.toggle('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('widgetChatForm');
+    const chatMessage = document.getElementById('widgetChatMessage');
+    const chatContainer = document.getElementById('widgetChatContainer');
+    
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const message = chatMessage.value.trim();
+        if (!message) return;
+        
+        // Add user message to chat
+        addMessage('user', message);
+        chatMessage.value = '';
+
+        // Call backend API
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            addMessage('assistant', data.response);
+        } catch (error) {
+            addMessage('assistant', 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.');
+        }
+    });
+    
+    function addMessage(sender, text) {
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2, '0') + ':' + 
+                    now.getMinutes().toString().padStart(2, '0');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${sender}`;
+        
+        messageDiv.innerHTML = `
+            <div class="chat-bubble">
+                <p>${text}</p>
+            </div>
+            <small class="text-muted">${sender === 'user' ? 'Bạn' : 'Trợ lý ShareGeb'}</small>
+        `;
+        
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+});
+</script> 
