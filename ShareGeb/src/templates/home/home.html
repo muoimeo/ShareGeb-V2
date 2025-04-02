@@ -7,7 +7,7 @@
         position: relative;
         height: 90vh;
         min-height: 700px;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ url_for('static', filename='image/hero/hero.jpg') }}');
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("{{ url_for('static', filename='image/hero/hero.jpg') }}");
         background-size: cover;
         background-position: center;
         color: white;
@@ -104,6 +104,17 @@
         border-radius: 15px;
         overflow: hidden;
         box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    #map {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .mapboxgl-canvas {
+        width: 100% !important;
+        height: 100% !important;
     }
 
     .map-info {
@@ -373,7 +384,7 @@
         <div class="row align-items-center">
             <div class="col-lg-8" data-aos="fade-right">
                 <div class="map-container">
-                    <div id="map" style="width: 100%; height: 100%;"></div>
+                    <div id="map"></div>
                 </div>
             </div>
             <div class="col-lg-4" data-aos="fade-left">
@@ -692,38 +703,60 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize map
-        var map = L.map('map').setView([21.0285, 105.8542], 13);
+        console.log('DOM loaded, initializing map');
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        // Kiểm tra element map và kích thước
+        var mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+            console.error('Không tìm thấy element với id "map"');
+            return;
+        }
         
-        // Add some sample cars to the map
-        var carIcon = L.icon({
-            iconUrl: "{{ url_for('static', filename='image/car-icon.png') }}",
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
+        // Kiểm tra xem Mapbox đã được load chưa
+        if (typeof mapboxgl === 'undefined') {
+            console.error('Mapbox GL JS không được tải!');
+            return;
+        }
+        
+        console.log('Mapbox GL JS đã được tải');
+
+        // Khởi tạo Mapbox
+        mapboxgl.accessToken = 'pk.eyJ1IjoibXVvaW1lbyIsImEiOiJjbTh5Y3FtNzAwYXd4MmpxeDVrcGViMHY1In0.4B_fLJjaZU0KY9pA2TlbKA';
+        
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [105.8542, 21.0285], // Tọa độ Hà Nội [lng, lat]
+            zoom: 13
         });
         
-        // Sample car locations
+        // Thêm điều khiển zoom và xoay
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // Mảng vị trí xe mẫu
         var cars = [
-            {lat: 21.0285, lng: 105.8542},
-            {lat: 21.0305, lng: 105.8462},
-            {lat: 21.0225, lng: 105.8492},
-            {lat: 21.0345, lng: 105.8612},
-            {lat: 21.0195, lng: 105.8382},
-            {lat: 21.0275, lng: 105.8652},
-            {lat: 21.0185, lng: 105.8532}
+            {lng: 105.8542, lat: 21.0285},
+            {lng: 105.8462, lat: 21.0305},
+            {lng: 105.8492, lat: 21.0225},
+            {lng: 105.8612, lat: 21.0345},
+            {lng: 105.8382, lat: 21.0195},
+            {lng: 105.8652, lat: 21.0275},
+            {lng: 105.8532, lat: 21.0185}
         ];
-        
-        // Add markers for each car
-        cars.forEach(function(car) {
-            L.marker([car.lat, car.lng], {icon: carIcon}).addTo(map);
+
+        // Xử lý khi map được tải xong
+        map.on('load', function() {
+            console.log('Map loaded successfully');
+            
+            // Thêm marker đơn giản cho mỗi xe
+            cars.forEach(function(car) {
+                new mapboxgl.Marker()
+                    .setLngLat([car.lng, car.lat])
+                    .addTo(map);
+            });
         });
         
-        // About carousel auto slide
+        // Carousel
         var aboutCarousel = document.getElementById('aboutCarousel');
         if (aboutCarousel) {
             var carousel = new bootstrap.Carousel(aboutCarousel, {
