@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #FD5602;      /* Main vibrant orange */
+    --primary-color: #FD6502;      /* Main vibrant orange */
     --primary-dark: #D44700;       /* Darker version of main color */
     --primary-light: #FE7A33;      /* Lighter version of main color */
     --secondary-color: #FFAF42;    /* Neutral soft orange */
@@ -23,7 +23,7 @@ body {
 }
 
 .navbar {
-    background: var(--gradient-primary) !important;
+    background: var(--primary-color) !important;
     box-shadow: 0 3px 8px var(--shadow-color);
 }
 

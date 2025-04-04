@@ -1,16 +1,22 @@
 <!-- Chat Widget Button -->
 <div id="chatWidgetBtn" class="chat-widget-btn">
-    <button class="btn btn-primary rounded-circle shadow-sm" onclick="toggleChatWidget()">
-        <i class="fas fa-comments"></i>
+    <button class="btn rounded-circle shadow-sm" style="background-color: rgb(255, 228, 251); border: 3px solid var(--warning-color); position: relative;" onclick="toggleChatWidget()">
+        <img src="{{ url_for('static', filename='image/kachat/kachat.png') }}" alt="Kachat" style="width: 46px; height: 46px;">
+        <div class="chat-tip" id="chatTip">
+            <div class="chat-tip-bubble">
+                Xin chào, tôi là mèo Kachat - trợ lý ảo của bạn! Tôi có thể giúp gì cho bạn hôm nay?
+            </div>
+        </div>
     </button>
 </div>
 
 <!-- Chat Widget Panel -->
 <div id="chatWidgetPanel" class="chat-widget-panel">
-    <div class="chat-widget-header bg-primary text-white p-3">
+    <div class="chat-widget-header text-white p-3" style="background-color: var(--warning-color);">
         <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">
-                <i class="fas fa-comments me-2"></i>Hỗ trợ trực tuyến
+            <h6 class="mb-0 d-flex align-items-center">
+                <img src="{{ url_for('static', filename='image/kachat/movin_kachat.gif') }}" alt="Kachat" class="me-2" style="width: 45px; height: 45px; border-radius: 0%;">
+                Hỗ trợ trực tuyến
             </h6>
             <button type="button" class="btn-close btn-close-white" onclick="toggleChatWidget()"></button>
         </div>
@@ -19,15 +25,18 @@
         <div class="chat-container" id="widgetChatContainer">
             <div class="chat-message assistant">
                 <div class="chat-bubble">
-                    <p>Hello Meow! Kachat luôn sẵn sàng phục vụ. Tôi có thể giúp gì cho bạn?</p>
+                    <p>Meoww! Rất vui được gặp bạn, Kachat luôn sẵn sàng phục vụ. Tôi có thể giúp gì cho bạn hôm nay?</p>
                 </div>
-                <small class="text-muted">Kachat😼</small>
+                <div class="d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='image/kachat/kachat.png') }}" alt="Kachat" class="me-1" style="width: 20px; height: 20px; border-radius: 50%;">
+                    <small class="text-muted">Kachat</small>
+                </div>
             </div>
         </div>
         <div class="chat-input mt-3">
             <form id="widgetChatForm" class="d-flex">
                 <input type="text" id="widgetChatMessage" class="form-control me-2" placeholder="Nhập tin nhắn..." required>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn" style="background-color: var(--warning-color); border-color: var(--warning-color); color: white;">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </form>
@@ -49,6 +58,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
 }
 
 .chat-widget-btn .btn i {
@@ -110,12 +120,67 @@
 }
 
 .chat-message.assistant .chat-bubble {
-    background-color: #f0f2f5;
+    background-color: var(--warning-color);
+    color: white;
     border-bottom-left-radius: 5px;
 }
 
 .chat-bubble p {
     margin-bottom: 0;
+}
+
+.chat-tip {
+    position: absolute;
+    top: -80px;
+    left: -165px;
+    width: 200px;
+    animation: pulse-slow 2s infinite;
+    z-index: 1001;
+}
+
+.chat-tip-bubble {
+    background-color: var(--warning-color);
+    color: white;
+    padding: 10px;
+    border-radius: 12px;
+    border-bottom-right-radius: 2px;
+    font-size: 12px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    text-align: left;
+}
+
+.chat-tip-bubble:after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    bottom: -10px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid var(--warning-color);
+}
+
+@keyframes pulse-slow {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 767px) {
+    .chat-tip {
+        left: -150px;
+    }
 }
 </style>
 
@@ -123,12 +188,23 @@
 function toggleChatWidget() {
     const panel = document.getElementById('chatWidgetPanel');
     panel.classList.toggle('active');
+    
+    // Ẩn tip khi người dùng click
+    document.getElementById('chatTip').style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     const chatForm = document.getElementById('widgetChatForm');
     const chatMessage = document.getElementById('widgetChatMessage');
     const chatContainer = document.getElementById('widgetChatContainer');
+    
+    // Tự động ẩn tip sau 10 giây
+    setTimeout(function() {
+        const tip = document.getElementById('chatTip');
+        if (tip) {
+            tip.style.display = 'none';
+        }
+    }, 10000);
     
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -163,11 +239,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${sender}`;
         
+        let senderHtml = sender === 'user' ? 'Bạn' : 
+            `<div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename='image/kachat/kachat.png') }}" alt="Kachat" class="me-1" style="width: 20px; height: 20px; border-radius: 50%;">
+                <span>Kachat</span>
+            </div>`;
+        
         messageDiv.innerHTML = `
             <div class="chat-bubble">
                 <p>${text}</p>
             </div>
-            <small class="text-muted">${sender === 'user' ? 'Bạn' : 'Trợ lý ShareGeb'}</small>
+            <small class="text-muted">${senderHtml}</small>
         `;
         
         chatContainer.appendChild(messageDiv);

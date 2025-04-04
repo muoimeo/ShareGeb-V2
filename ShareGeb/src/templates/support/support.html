@@ -15,14 +15,14 @@
         <div class="col-md-6 offset-md-3 mb-4" data-aos="fade-up">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body text-center p-4">
-                    <div class="rounded-circle bg-primary bg-opacity-10 p-4 d-inline-flex mb-3">
-                        <i class="fas fa-headset text-primary fa-4x"></i>
+                    <div class="rounded-circle p-3 d-inline-flex mb-3 justify-content-center align-items-center" style="width: 120px; height: 120px; overflow: hidden; background-color: rgb(255, 228, 251); border: 3px solid var(--warning-color); color: white; position: relative;">
+                        <img src="{{ url_for('static', filename='image/kachat/kachat.png') }}" alt="Kachat" class="img-fluid" style="width: 100px; height: 100px; object-fit: contain;">
                     </div>
                     <h3 class="mb-3">Trò truyện cùng trợ lý ảo đáng yêu</h3>
                     <p class="card-text text-muted">
                         Trò chuyện trực tiếp với chú mèo Kachat để được giải đáp nhanh chóng.
                     </p>
-                    <button class="btn btn-primary btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#chatModal">
+                    <button class="btn btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#chatModal" style="background-color: var(--warning-color); border-color: var(--warning-color); color: white;">
                         <i class="fas fa-comments me-2"></i>Trò chuyện ngay
                     </button>
                 </div>
@@ -262,9 +262,12 @@
 <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header text-white">
                 <h5 class="modal-title" id="chatModalLabel">
-                    <i class="fas fa-comments me-2"></i>Hỗ trợ trực tuyến
+                    <div class="d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='image/kachat/movin_kachat.gif') }}" alt="Kachat" class="me-2" style="width: 45px; height: 45px; border-radius: 0%;">
+                        Hỗ trợ trực tuyến
+                    </div>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -274,14 +277,17 @@
                         <div class="chat-bubble">
                             <p>Hello Meow! Kachat luôn sẵn sàng phục vụ. Tôi có thể giúp gì cho bạn?</p>
                         </div>
-                        <small class="text-muted">Kachat😼</small>
+                        <div class="d-flex align-items-center">
+                            <img src="{{ url_for('static', filename='image/kachat/kachat.png') }}" alt="Kachat" class="me-1" style="width: 20px; height: 20px; border-radius: 50%;">
+                            <small class="text-muted">Kachat</small>
+                        </div>
                     </div>
                     <!-- Chat messages will appear here -->
                 </div>
                 <div class="chat-input mt-3">
                     <form id="chatForm" class="d-flex">
                         <input type="text" id="chatMessage" class="form-control me-2" placeholder="Nhập tin nhắn..." required>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn" style="background-color: var(--warning-color); border-color: var(--warning-color); color: white;">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </form>
@@ -302,6 +308,32 @@
         border-color: rgba(0,0,0,.125);
     }
     
+    /* Modal chat styling */
+    #chatModal .modal-dialog {
+        max-width: 500px;
+        margin: 1.75rem auto;
+    }
+    
+    #chatModal .modal-content {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+    
+    #chatModal .modal-header {
+        border-bottom: none;
+        padding: 0.75rem 1rem;
+        border-radius: 0;
+        background-color: var(--warning-color);
+    }
+    
+    #chatModal .modal-body {
+        padding: 1rem;
+        padding-top: 0.5rem;
+    }
+    
+    /* Chat styling */
     .chat-container {
         height: 300px;
         overflow-y: auto;
@@ -336,7 +368,8 @@
     }
     
     .chat-message.assistant .chat-bubble {
-        background-color: #f0f2f5;
+        background-color: var(--warning-color);
+        color: white;
         border-bottom-left-radius: 5px;
     }
     
@@ -384,11 +417,17 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${sender}`;
             
+            let senderHtml = sender === 'user' ? 'Bạn' : 
+                `<div class="d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='image/kachat/kachat.png') }}" alt="Kachat" class="me-1" style="width: 20px; height: 20px; border-radius: 50%;">
+                    <span>Kachat</span>
+                 </div>`;
+            
             messageDiv.innerHTML = `
                 <div class="chat-bubble">
                     <p>${text}</p>
                 </div>
-                <small class="text-muted">${sender === 'user' ? 'Bạn' : 'Trợ lý ShareGeb'}, ${time}</small>
+                <small class="text-muted">${senderHtml}</small>
             `;
             
             chatContainer.appendChild(messageDiv);
