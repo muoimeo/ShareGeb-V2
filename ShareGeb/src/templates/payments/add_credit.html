@@ -13,15 +13,15 @@
                 <div class="card-body">
                     <div class="tab-buttons mb-4">
                         <div class="btn-group w-100">
-                            <a href="{{ url_for('payment.add_payment_method', payment_type='credit') }}" 
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='credit') }}{% if session.get('from_booking') %}?from_booking=1&ride_type={{ session.get('ride_type', 'shared') }}{% endif %}" 
                                class="btn btn-lg btn-primary">
                                 <i class="fas fa-credit-card me-2"></i>Thẻ tín dụng/ghi nợ
                             </a>
-                            <a href="{{ url_for('payment.add_payment_method', payment_type='bank') }}" 
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='bank') }}{% if session.get('from_booking') %}?from_booking=1&ride_type={{ session.get('ride_type', 'shared') }}{% endif %}" 
                                class="btn btn-lg btn-outline-primary">
                                 <i class="fas fa-university me-2"></i>Tài khoản ngân hàng
                             </a>
-                            <a href="{{ url_for('payment.add_payment_method', payment_type='ewallet') }}" 
+                            <a href="{{ url_for('payment.add_payment_method', payment_type='ewallet') }}{% if session.get('from_booking') %}?from_booking=1&ride_type={{ session.get('ride_type', 'shared') }}{% endif %}" 
                                class="btn btn-lg btn-outline-primary">
                                 <i class="fas fa-wallet me-2"></i>Ví điện tử
                             </a>
@@ -29,7 +29,14 @@
                     </div>
 
                     <!-- Form thêm thẻ tín dụng -->
-                    <form action="{{ url_for('payment.add_credit_card') }}{% if request.args.get('from_booking') %}?from_booking=1{% endif %}" method="post" id="creditCardForm">
+                    <form action="{{ url_for('payment.add_credit_card') }}" method="post" id="creditCardForm">
+                        <!-- Hidden inputs để truyền thông tin quan trọng -->
+                        <input type="hidden" name="from_booking" value="{{ session.get('from_booking', '0') }}">
+                        <input type="hidden" name="ride_type" value="{{ session.get('ride_type', 'shared') }}">
+                        <input type="hidden" name="pickup" value="{{ session.get('pickup', '') }}">
+                        <input type="hidden" name="destination" value="{{ session.get('destination', '') }}">
+                        <input type="hidden" name="pickup_coords" value="{{ session.get('pickup_coords', '') }}">
+                        <input type="hidden" name="destination_coords" value="{{ session.get('destination_coords', '') }}">
                         <div class="mb-4">
                             <div class="credit-card-container">
                                 <div class="credit-card">
@@ -120,28 +127,46 @@
                             <label class="form-check-label" for="saveCard">Lưu thông tin thẻ này cho lần sau</label>
                         </div>
 
-                        <div class="security-notice mb-4">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-shield-alt fs-3 me-3 text-primary"></i>
-                                <div>
-                                    <p class="mb-0">Thông tin thẻ của bạn được bảo mật 100% theo tiêu chuẩn PCI DSS</p>
-                                    <small class="text-muted">Chúng tôi không lưu trữ CVV sau khi xác thực</small>
+                        <div class="mb-4">
+                            <div class="text-center">
+                                <div class="alert alert-info d-flex" role="alert">
+                                    <i class="fas fa-info-circle fs-5 me-3 align-self-center"></i>
+                                    <div>
+                                        <strong>Lưu ý:</strong>
+                                        <p class="mb-0">Thông tin thẻ của bạn sẽ được mã hóa và bảo vệ theo tiêu chuẩn bảo mật thanh toán quốc tế PCI DSS.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-check-circle me-2"></i>Thêm thẻ mới
+                                <i class="fas fa-credit-card me-2"></i>{% if session.get('from_booking') == '1' %}Thêm thẻ tín dụng{% else %}Lỗi{% endif %}
                             </button>
-                            {% if request.args.get('from_booking') %}
-                            <a href="{{ url_for('book_ride.book_ride') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Quay lại đặt xe
-                            </a>
+                            {% if session.get('from_booking') == '1' %}
+                                {% if session.get('ride_type') == 'closed' %}
+                                    <a href="{{ url_for('book_ride.book_ride_closed',
+                                                        pickup=session.get('pickup', ''),
+                                                        destination=session.get('destination', ''),
+                                                        pickup_coords=session.get('pickup_coords', ''),
+                                                        destination_coords=session.get('destination_coords', '')) }}"
+                                        class="btn btn-outline-secondary mt-2">
+                                        <i class="fas fa-times me-2"></i>Hủy và quay lại
+                                    </a>
+                                {% else %}
+                                    <a href="{{ url_for('book_ride.book_ride_shared',
+                                                        pickup=session.get('pickup', ''),
+                                                        destination=session.get('destination', ''),
+                                                        pickup_coords=session.get('pickup_coords', ''),
+                                                        destination_coords=session.get('destination_coords', '')) }}"
+                                        class="btn btn-outline-secondary mt-2">
+                                        <i class="fas fa-times me-2"></i>Hủy và quay lại
+                                    </a>
+                                {% endif %}
                             {% else %}
-                            <a href="{{ url_for('users.profile') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Quay lại hồ sơ
-                            </a>
+                                <a href="{{ url_for('users.profile') }}" class="btn btn-outline-secondary mt-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay lại hồ sơ
+                                </a>
                             {% endif %}
                         </div>
                     </form>

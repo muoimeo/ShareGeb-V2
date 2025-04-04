@@ -39,35 +39,64 @@ def add_payment_method(payment_type):
     now = datetime.now()
     valid_types = ['credit', 'bank', 'ewallet']
     
+    # Log để debug
+    current_app.logger.info(f"===== ADD PAYMENT METHOD DEBUG ======")
+    current_app.logger.info(f"Payment type: {payment_type}")
+    current_app.logger.info(f"Request args: {request.args}")
+    current_app.logger.info(f"Request referrer: {request.referrer}")
+    current_app.logger.info(f"Current session before processing: {dict(session)}") # Log session hiện tại
+
     if payment_type not in valid_types:
         flash('Phương thức thanh toán không hợp lệ', 'error')
         return redirect(url_for('users.settings'))
-    
-    # Lưu đường dẫn trước đó để chuyển hướng sau khi thêm
+
+    # Xác định xem có phải đến từ trang đặt xe không
     from_booking = request.args.get('from_booking', '0')
-    session['from_booking'] = from_booking
-    
-    # Lưu thông tin ride_type vào session nếu có trong URL
-    ride_type = request.args.get('ride_type', '')
-    if ride_type:
-        session['ride_type'] = ride_type
-    
-    # Lưu thông tin điểm đón và điểm đến vào session nếu có
+    session['from_booking'] = from_booking # Luôn lưu trạng thái from_booking
+
+    # Chỉ lưu thông tin chi tiết chuyến đi vào session nếu đến từ trang đặt xe
     if from_booking == '1':
-        pickup = request.args.get('pickup', '')
-        destination = request.args.get('destination', '')
-        pickup_coords = request.args.get('pickup_coords', '')
-        destination_coords = request.args.get('destination_coords', '')
-        
+        ride_type = request.args.get('ride_type')
+        if ride_type:
+            session['ride_type'] = ride_type
+            current_app.logger.info(f"Đã lưu ride_type vào session từ args: {ride_type}")
+        else:
+            # Nếu from_booking=1 mà không có ride_type -> có lỗi logic ở trang trước
+            current_app.logger.warning("from_booking=1 nhưng không có ride_type trong request.args!")
+            # Có thể xóa ride_type cũ để tránh nhầm lẫn nếu cần
+            # session.pop('ride_type', None)
+
+        pickup = request.args.get('pickup')
         if pickup:
             session['pickup'] = pickup
+            current_app.logger.info(f"Đã lưu pickup vào session từ args: {pickup}")
+
+        destination = request.args.get('destination')
         if destination:
             session['destination'] = destination
+            current_app.logger.info(f"Đã lưu destination vào session từ args: {destination}")
+
+        pickup_coords = request.args.get('pickup_coords')
         if pickup_coords:
             session['pickup_coords'] = pickup_coords
+            current_app.logger.info(f"Đã lưu pickup_coords vào session từ args: {pickup_coords}")
+
+        destination_coords = request.args.get('destination_coords')
         if destination_coords:
             session['destination_coords'] = destination_coords
-    
+            current_app.logger.info(f"Đã lưu destination_coords vào session từ args: {destination_coords}")
+    else:
+        # Nếu không phải từ trang đặt xe, xóa thông tin chuyến đi cũ khỏi session để tránh nhầm lẫn
+        session.pop('ride_type', None)
+        session.pop('pickup', None)
+        session.pop('destination', None)
+        session.pop('pickup_coords', None)
+        session.pop('destination_coords', None)
+        current_app.logger.info("Không phải từ trang đặt xe, đã xóa thông tin chuyến đi cũ khỏi session (nếu có).")
+
+    # Log session sau khi cập nhật
+    current_app.logger.info(f"Session data after processing args: {dict(session)}")
+
     template = f'payments/add_{payment_type}.html'
     return render_template(template, now=now)
 
@@ -81,6 +110,15 @@ def add_credit_card():
         expiry_year = request.form.get('expiry_year')
         card_holder = request.form.get('card_holder')
         cvv = request.form.get('cvv')
+        
+        # Thêm logging để debug
+        current_app.logger.info("==== ADD CREDIT CARD FORM DATA ====")
+        for key, value in request.form.items():
+            current_app.logger.info(f"Form[{key}] = {value}")
+        
+        current_app.logger.info("==== ADD CREDIT CARD SESSION DATA ====")
+        for key, value in session.items():
+            current_app.logger.info(f"Session[{key}] = {value}")
         
         if not all([card_type, card_number, expiry_month, expiry_year, card_holder, cvv]):
             flash('Vui lòng điền đầy đủ thông tin thẻ', 'error')
@@ -98,23 +136,27 @@ def add_credit_card():
         
         # Tạo đối tượng datetime cho ngày hết hạn
         try:
-            expiry_date = datetime.strptime(f"{expiry_year}-{expiry_month}-01", "%y-%m-%d").date()
-            
-            # Kiểm tra thẻ không được hết hạn
-            if expiry_date < datetime.now().date():
-                flash('Thẻ đã hết hạn', 'error')
-                return redirect(url_for('payment.add_payment_method', payment_type='credit'))
+            # Tạo datetime từ tháng và năm hết hạn
+            expiry_date = datetime(int(expiry_year), int(expiry_month), 1)
         except ValueError:
             flash('Ngày hết hạn không hợp lệ', 'error')
             return redirect(url_for('payment.add_payment_method', payment_type='credit'))
         
-        # Tạo object thẻ mới
+        # Kiểm tra thẻ đã hết hạn chưa
+        if expiry_date <= datetime.now():
+            flash('Thẻ đã hết hạn', 'error')
+            return redirect(url_for('payment.add_payment_method', payment_type='credit'))
+        
+        # Tạo object thẻ tín dụng mới
         card = CreditCard(
             user_id=current_user.user_id,
+            card_type=card_type,
             card_number=card_number,
-            expiry_date=expiry_date,
-            card_holder_name=card_holder,
-            card_type=card_type
+            expiry_month=expiry_month,
+            expiry_year=expiry_year,
+            card_holder=card_holder,
+            cvv=cvv,
+            is_default=False
         )
         
         # Lưu vào database
@@ -123,33 +165,50 @@ def add_credit_card():
         
         flash('Thêm thẻ thành công', 'success')
         
+        # Lấy thông tin đặt xe từ form
+        from_booking = request.form.get('from_booking')
+        ride_type = request.form.get('ride_type')
+        pickup = request.form.get('pickup')
+        destination = request.form.get('destination')
+        pickup_coords = request.form.get('pickup_coords')
+        destination_coords = request.form.get('destination_coords')
+        
+        # Log để debug
+        current_app.logger.info(f"Form data: from_booking={from_booking}, ride_type={ride_type}, pickup={pickup}")
+        
         # Chuyển hướng về trang trước đó
-        if session.get('from_booking') == '1':
+        if from_booking == '1':
             # Tạo URL với tham số chứa thông tin điểm đón và điểm đến
             params = {}
-            if 'pickup' in session:
-                params['pickup'] = session.get('pickup')
-            if 'destination' in session:
-                params['destination'] = session.get('destination')
-            if 'pickup_coords' in session:
-                params['pickup_coords'] = session.get('pickup_coords')
-            if 'destination_coords' in session:
-                params['destination_coords'] = session.get('destination_coords')
+            if pickup:
+                params['pickup'] = pickup
+            if destination:
+                params['destination'] = destination
+            if pickup_coords:
+                params['pickup_coords'] = pickup_coords
+            if destination_coords:
+                params['destination_coords'] = destination_coords
             
-            # Xóa thông tin khỏi session sau khi sử dụng
-            for key in ['pickup', 'destination', 'pickup_coords', 'destination_coords']:
-                if key in session:
-                    session.pop(key)
+            # Log params trước khi chuyển hướng
+            current_app.logger.info(f"Redirecting to {ride_type} ride with params: {params}")
+            
+            # Tạo URL để log
+            if ride_type == 'closed':
+                redirect_url = url_for('book_ride.book_ride_closed', **params)
+            else:
+                redirect_url = url_for('book_ride.book_ride_shared', **params)
+                
+            current_app.logger.info(f"Full redirect URL: {redirect_url}")
             
             # Chuyển về trang đặt xe ghép hoặc riêng dựa vào loại xe đã chọn
-            ride_type = session.pop('ride_type', 'shared')
             if ride_type == 'closed':
                 return redirect(url_for('book_ride.book_ride_closed', **params))
             else:
                 return redirect(url_for('book_ride.book_ride_shared', **params))
         else:
+            current_app.logger.info("Redirecting to profile page as from_booking is not '1'")
             return redirect(url_for('users.profile'))
-        
+            
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f'Error adding credit card: {str(e)}')
@@ -164,51 +223,84 @@ def add_bank_account():
         account_number = request.form.get('account_number')
         account_holder = request.form.get('account_holder')
         
+        # Thêm logging để debug
+        current_app.logger.info("==== ADD BANK ACCOUNT FORM DATA ====")
+        for key, value in request.form.items():
+            current_app.logger.info(f"Form[{key}] = {value}")
+        
+        current_app.logger.info("==== ADD BANK ACCOUNT SESSION DATA ====")
+        for key, value in session.items():
+            current_app.logger.info(f"Session[{key}] = {value}")
+        
         if not all([bank_name, account_number, account_holder]):
-            flash('Vui lòng điền đầy đủ thông tin tài khoản', 'error')
+            flash('Vui lòng điền đầy đủ thông tin tài khoản ngân hàng', 'error')
             return redirect(url_for('payment.add_payment_method', payment_type='bank'))
         
-        # Tạo object tài khoản mới
-        account = BankAccount(
+        # Kiểm tra số tài khoản chỉ chứa số
+        if not account_number.isdigit():
+            flash('Số tài khoản chỉ được chứa số', 'error')
+            return redirect(url_for('payment.add_payment_method', payment_type='bank'))
+        
+        # Tạo object tài khoản ngân hàng mới
+        bank_account = BankAccount(
             user_id=current_user.user_id,
             bank_name=bank_name,
             account_number=account_number,
-            account_holder_name=account_holder
+            account_holder=account_holder,
+            branch="",  # Để trống vì không có trường branch trong form
+            is_default=False
         )
         
         # Lưu vào database
-        db.session.add(account)
+        db.session.add(bank_account)
         db.session.commit()
         
-        flash('Thêm tài khoản thành công', 'success')
+        flash('Thêm tài khoản ngân hàng thành công', 'success')
+        
+        # Lấy thông tin đặt xe từ form
+        from_booking = request.form.get('from_booking')
+        ride_type = request.form.get('ride_type')
+        pickup = request.form.get('pickup')
+        destination = request.form.get('destination')
+        pickup_coords = request.form.get('pickup_coords')
+        destination_coords = request.form.get('destination_coords')
+        
+        # Log để debug
+        current_app.logger.info(f"Form data: from_booking={from_booking}, ride_type={ride_type}, pickup={pickup}")
         
         # Chuyển hướng về trang trước đó
-        if session.get('from_booking') == '1':
+        if from_booking == '1':
             # Tạo URL với tham số chứa thông tin điểm đón và điểm đến
             params = {}
-            if 'pickup' in session:
-                params['pickup'] = session.get('pickup')
-            if 'destination' in session:
-                params['destination'] = session.get('destination')
-            if 'pickup_coords' in session:
-                params['pickup_coords'] = session.get('pickup_coords')
-            if 'destination_coords' in session:
-                params['destination_coords'] = session.get('destination_coords')
+            if pickup:
+                params['pickup'] = pickup
+            if destination:
+                params['destination'] = destination
+            if pickup_coords:
+                params['pickup_coords'] = pickup_coords
+            if destination_coords:
+                params['destination_coords'] = destination_coords
             
-            # Xóa thông tin khỏi session sau khi sử dụng
-            for key in ['pickup', 'destination', 'pickup_coords', 'destination_coords']:
-                if key in session:
-                    session.pop(key)
+            # Log params trước khi chuyển hướng
+            current_app.logger.info(f"Redirecting to {ride_type} ride with params: {params}")
+            
+            # Tạo URL để log
+            if ride_type == 'closed':
+                redirect_url = url_for('book_ride.book_ride_closed', **params)
+            else:
+                redirect_url = url_for('book_ride.book_ride_shared', **params)
+                
+            current_app.logger.info(f"Full redirect URL: {redirect_url}")
             
             # Chuyển về trang đặt xe ghép hoặc riêng dựa vào loại xe đã chọn
-            ride_type = session.pop('ride_type', 'shared')
             if ride_type == 'closed':
                 return redirect(url_for('book_ride.book_ride_closed', **params))
             else:
                 return redirect(url_for('book_ride.book_ride_shared', **params))
         else:
+            current_app.logger.info("Redirecting to profile page as from_booking is not '1'")
             return redirect(url_for('users.profile'))
-            
+        
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f'Error adding bank account: {str(e)}')
@@ -282,6 +374,14 @@ def add_ewallet():
             
             # Log params trước khi chuyển hướng
             current_app.logger.info(f"Redirecting to {ride_type} ride with params: {params}")
+            
+            # Tạo URL để log
+            if ride_type == 'closed':
+                redirect_url = url_for('book_ride.book_ride_closed', **params)
+            else:
+                redirect_url = url_for('book_ride.book_ride_shared', **params)
+                
+            current_app.logger.info(f"Full redirect URL: {redirect_url}")
             
             # Chuyển về trang đặt xe ghép hoặc riêng dựa vào loại xe đã chọn
             if ride_type == 'closed':
